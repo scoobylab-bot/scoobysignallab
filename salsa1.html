@@ -1254,8 +1254,30 @@ initPips('pips')
 initPips('catch-pips')
 renderHome()
 renderLearnList()
-// Warm up audio on first tap anywhere
-document.addEventListener('pointerdown',()=>{ engine.init().catch(()=>{}) }, {once:true})
+// Aggressive audio unlock for iOS/Safari/Chrome
+// Must call resume() on EVERY user gesture until context is running
+async function unlockAudio() {
+  try {
+    await engine.init();
+    if (engine.ctx && engine.ctx.state === 'suspended') {
+      await engine.ctx.resume();
+    }
+  } catch(e) {}
+}
+['touchstart','touchend','pointerdown','click','keydown'].forEach(ev => {
+  document.addEventListener(ev, unlockAudio, {passive: true});
+});
+
+// Show audio unlock banner until first interaction
+const banner = document.createElement('div');
+banner.id = 'audio-banner';
+banner.innerHTML = '🔊 Tap anywhere to enable audio';
+banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999;background:var(--red);color:white;text-align:center;padding:10px;font-size:14px;font-weight:600;font-family:var(--fd);letter-spacing:.03em;cursor:pointer';
+document.body.appendChild(banner);
+document.addEventListener('pointerdown', () => {
+  const b = document.getElementById('audio-banner');
+  if (b) { b.style.opacity='0'; b.style.transition='opacity .3s'; setTimeout(()=>b.remove(), 300); }
+}, {once: true});
 </script>
 </body>
 </html>
