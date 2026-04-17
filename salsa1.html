@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no"/>
+<meta name="theme-color" content="#C8372D"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Salsa1"/>
+<title>Salsa1 – Beat Training</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#C8372D;--red-dark:#9B271E;
+  --gold:#D4A017;--gold-light:#F5CC5A;
+  --bg:#0F0C0C;--surf:#1A1614;--surf2:#231D1D;--surf3:#2E2626;
+  --text:#F0ECE8;--muted:#8A7F7A;--faint:#443D3D;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --ok:#4CAF7D;--warn:#E8A827;--err:#E05252;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bot:env(safe-area-inset-bottom,0px);
+}
+html{background:var(--bg);height:100%;overscroll-behavior:none}
+body{
+  font-family:var(--fb);background:var(--bg);color:var(--text);
+  min-height:100dvh;-webkit-text-size-adjust:100%;
+  -webkit-font-smoothing:antialiased;touch-action:manipulation;
+  user-select:none;-webkit-user-select:none;overscroll-behavior-y:contain;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+a,-webkit-tap-highlight-color:transparent}
+input{font-family:inherit}
+::-webkit-scrollbar{width:2px}
+::-webkit-scrollbar-thumb{background:var(--surf3);border-radius:2px}
+
+#shell{
+  display:flex;flex-direction:column;min-height:100dvh;
+  max-width:480px;margin:0 auto;position:relative;background:var(--bg);
+}
+#main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(64px + var(--safe-bot))}
+
+/* SCREENS */
+.screen{display:none;flex-direction:column;min-height:100%}
+.screen.on{display:flex}
+
+/* BOTTOM NAV */
+#nav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;
+  background:rgba(15,12,12,0.94);backdrop-filter:blur(20px);
+  border-top:.5px solid var(--border);
+  display:flex;padding-bottom:var(--safe-bot);z-index:100;
+}
+.nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:10px 4px 8px;gap:3px;color:var(--faint);background:none;border:none;
+  font-size:10px;font-weight:500;letter-spacing:.03em;transition:color .15s;
+}
+.nav-btn.act{color:var(--red)}
+.nav-icon{font-size:18px;line-height:1}
+
+/* SECTION LABEL */
+.slabel{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:0 20px;margin-bottom:10px}
+
+/* CARDS */
+.card{background:var(--surf);border:.5px solid var(--border);border-radius:16px;padding:16px}
+
+/* ── HOME ─────────────────────────────── */
+#s-home{}
+.home-hdr{padding:20px 20px 16px;border-bottom:.5px solid var(--border)}
+.logo{font-family:var(--fd);font-size:24px;font-weight:800;letter-spacing:-.5px;color:var(--red)}
+.logo span{color:var(--gold)}
+.home-sub{font-size:13px;color:var(--muted);margin-top:2px}
+.streak-badge{
+  background:rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.3);
+  border-radius:12px;padding:8px 14px;text-align:center;
+}
+.streak-num{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--gold)}
+.streak-lbl{font-size:10px;color:var(--muted)}
+
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px 20px}
+.stat-card{background:var(--surf);border:.5px solid var(--border);border-radius:16px;padding:14px 8px;text-align:center}
+
+.ring-wrap{position:relative;width:56px;height:56px;margin:0 auto 6px}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-lbl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:13px;font-weight:700}
+.ring-name{font-size:11px;color:var(--muted)}
+
+.daily-card{
+  margin:0 20px 20px;
+  background:linear-gradient(135deg,#1E0F0E 0%,var(--surf) 100%);
+  border:.5px solid rgba(200,55,45,.3);border-radius:20px;padding:18px;cursor:pointer;
+}
+.daily-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.daily-tag{font-size:10px;color:var(--red);font-weight:500;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.daily-title{font-family:var(--fd);font-size:18px;font-weight:700}
+.daily-dur{background:rgba(200,55,45,.12);color:var(--red);font-size:12px;font-weight:500;padding:6px 12px;border-radius:8px}
+.daily-steps{display:flex;gap:8px}
+.daily-step{flex:1;background:rgba(255,255,255,.04);border-radius:8px;padding:8px 4px;text-align:center;font-size:10px;color:var(--muted);line-height:1.5}
+.daily-step-icon{font-size:15px;display:block;margin-bottom:3px}
+
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px;margin-bottom:20px}
+.mode-card{
+  text-align:left;background:var(--surf);border:.5px solid var(--border);
+  border-radius:16px;padding:16px 14px;cursor:pointer;position:relative;
+  transition:border-color .15s;
+}
+.mode-icon-wrap{width:36px;height:36px;border-radius:10px;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px}
+.mode-name{font-family:var(--fd);font-size:14px;font-weight:700;margin-bottom:4px}
+.mode-desc{font-size:11px;color:var(--muted);line-height:1.4}
+.mode-badge{position:absolute;top:10px;right:10px;font-size:9px;font-weight:600;padding:3px 7px;border-radius:5px;background:rgba(200,55,45,.18);color:var(--red);letter-spacing:.05em}
+
+/* ── PRACTICE ─────────────────────────── */
+#s-practice{}
+.prac-hdr{padding:16px 20px 12px;border-bottom:.5px solid var(--border);flex-shrink:0}
+.prac-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.level-pill{font-size:11px;font-weight:500;padding:4px 10px;border-radius:999px;background:rgba(200,55,45,.12);color:var(--red);letter-spacing:.06em}
+.acc-num{font-family:var(--fd);font-size:18px;font-weight:700;color:var(--gold)}
+
+.tempo-row{display:flex;gap:6px;background:var(--surf2);padding:5px;border-radius:12px}
+.tempo-btn{flex:1;padding:8px 4px;border-radius:8px;border:1.5px solid transparent;background:transparent;font-size:12px;font-weight:500;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+.tempo-btn.sel{border-color:currentColor}
+.tempo-bpm{font-size:10px;opacity:.7}
+
+.count-area{padding:20px 20px 12px;text-align:center;flex-shrink:0}
+.count-big{font-family:var(--fd);font-size:88px;font-weight:800;line-height:1;letter-spacing:-3px;transition:color .08s}
+.count-sub{font-size:13px;color:var(--muted);margin-top:6px}
+
+.pips{display:flex;gap:6px;padding:0 20px;margin-bottom:12px}
+.pip{flex:1;height:7px;border-radius:4px;background:var(--surf2);transition:all .08s ease}
+.pip.one{background:rgba(200,55,45,.3)}
+.pip.cur{height:11px;transform:scaleY(1)}
+.pip.cur.one{background:var(--red)}
+.pip.cur.other{background:var(--gold)}
+
+.phrase-area{padding:0 20px;margin-bottom:16px}
+.phrase-top{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px}
+.phrase-track{height:4px;background:var(--surf2);border-radius:2px;overflow:hidden}
+.phrase-fill{height:100%;background:var(--red);border-radius:2px;transition:width .06s linear,background .12s}
+
+.tap-zone{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 20px 16px;gap:18px}
+
+@keyframes ripple{to{transform:translate(-50%,-50%) scale(22);opacity:0}}
+.tap-btn{
+  width:170px;height:170px;border-radius:50%;
+  background:var(--surf);border:2px solid var(--border2);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  position:relative;overflow:hidden;transition:border-color .15s,transform .06s,background .1s;
+}
+.tap-btn.playing{border-color:rgba(200,55,45,.4);cursor:pointer}
+.tap-btn.playing:active{transform:scale(.91)}
+.tap-btn-icon{font-size:28px;pointer-events:none}
+.tap-btn-label{font-family:var(--fd);font-size:13px;font-weight:700;letter-spacing:.07em;pointer-events:none}
+.tap-btn-sub{font-size:11px;color:var(--muted);pointer-events:none}
+.ripple-el{position:absolute;border-radius:50%;width:12px;height:12px;background:rgba(200,55,45,.35);left:50%;top:50%;pointer-events:none;animation:ripple .5s ease-out forwards}
+
+.fb-pill{
+  padding:9px 22px;border-radius:999px;font-size:14px;font-weight:500;
+  text-align:center;min-width:200px;border:1px solid transparent;transition:all .12s;
+}
+.fb-neutral{background:var(--surf2);color:var(--muted);border-color:var(--border)}
+.fb-perfect{background:rgba(76,175,125,.15);color:var(--ok);border-color:rgba(76,175,125,.35)}
+.fb-good{background:rgba(232,168,39,.15);color:var(--warn);border-color:rgba(232,168,39,.35)}
+.fb-off{background:rgba(232,168,39,.1);color:var(--warn);border-color:rgba(232,168,39,.25)}
+.fb-miss{background:rgba(224,82,82,.15);color:var(--err);border-color:rgba(224,82,82,.35)}
+
+.running-stats{font-size:12px;color:var(--muted);display:flex;gap:14px}
+
+.ctrl-row{display:flex;gap:8px;padding:12px 20px;border-top:.5px solid var(--border);flex-shrink:0}
+.ctrl{flex:1;padding:12px 6px;border-radius:12px;border:1.5px solid var(--border);background:var(--surf2);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:18px;transition:all .15s}
+.ctrl span.cl{font-size:10px;font-family:var(--fb)}
+.ctrl.gold-on{border-color:rgba(212,160,23,.6);background:rgba(212,160,23,.1);color:var(--gold)}
+.ctrl.red-on{border-color:rgba(200,55,45,.6);background:rgba(200,55,45,.1);color:var(--red)}
+.play-ctrl{flex:2;padding:12px;border-radius:12px;border:none;background:var(--red);color:#fff;font-family:var(--fd);font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.03em;transition:background .15s}
+.play-ctrl.running{background:var(--red-dark)}
+
+.diff-row{display:flex;gap:6px;padding:0 20px 8px}
+.diff-btn{flex:1;padding:6px 2px;border-radius:8px;border:1px solid var(--border);background:transparent;font-size:11px;font-weight:500;color:var(--faint);transition:all .15s}
+.diff-btn.sel{border-color:rgba(200,55,45,.5);background:rgba(200,55,45,.1);color:var(--red)}
+
+/* ── CATCH THE 1 ──────────────────────── */
+.catch-hdr{padding:20px;border-bottom:.5px solid var(--border)}
+.catch-title{font-family:var(--fd);font-size:22px;font-weight:800;margin-bottom:4px}
+.catch-sub{font-size:13px;color:var(--muted)}
+
+.setup-body{flex:1;padding:20px;display:flex;flex-direction:column;gap:20px}
+.setup-label{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px}
+
+.diff-grid{display:flex;gap:8px}
+.diff-card{flex:1;padding:12px 4px;border-radius:12px;border:1.5px solid var(--border);background:var(--surf2);color:var(--muted);font-size:11px;font-weight:500;text-align:center;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:4px}
+.diff-card.sel{border-color:rgba(200,55,45,.5);background:rgba(200,55,45,.1);color:var(--red)}
+.diff-d{font-family:var(--fd);font-size:14px;font-weight:700}
+.diff-sub{font-size:9px;color:inherit;opacity:.7;line-height:1.3;text-align:center}
+
+.tempo-pick{display:flex;gap:8px}
+.tp-btn{flex:1;padding:10px 4px;border-radius:12px;border:1.5px solid var(--border);background:var(--surf2);font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:all .15s}
+.tp-bpm{font-size:10px}
+
+.score-card{background:var(--surf);border:.5px solid var(--border);border-radius:16px;padding:16px}
+.score-row{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}
+.score-tag{color:var(--muted)}
+
+.big-btn{
+  width:100%;padding:18px;border-radius:16px;border:none;
+  background:var(--red);color:#fff;font-family:var(--fd);
+  font-size:17px;font-weight:700;letter-spacing:.02em;margin-top:auto;
+  transition:background .15s,transform .08s;
+}
+.big-btn:active{transform:scale(.97);background:var(--red-dark)}
+.big-btn.secondary{background:var(--surf2);border:1.5px solid var(--border2);color:var(--text);font-size:14px}
+
+.play-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:0 20px}
+.catch-tap-btn{
+  width:190px;height:190px;border-radius:50%;cursor:pointer;
+  background:var(--surf);border:2.5px solid var(--border2);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  transition:border-color .06s,background .06s,transform .06s;position:relative;overflow:hidden;
+}
+.catch-tap-btn.one-lit{border-color:var(--red);background:rgba(200,55,45,.18)}
+.catch-tap-btn:active{transform:scale(.91)}
+.catch-tap-icon{font-size:36px;pointer-events:none}
+.catch-tap-label{font-family:var(--fd);font-size:14px;font-weight:700;letter-spacing:.05em;pointer-events:none}
+.catch-tap-hint{font-size:11px;color:var(--muted);pointer-events:none}
+.tally{font-size:12px;color:var(--muted);text-align:center}
+
+.result-body{flex:1;padding:24px 20px;display:flex;flex-direction:column;align-items:center;gap:20px}
+.result-score{font-family:var(--fd);font-size:72px;font-weight:800;line-height:1}
+.result-sub{font-size:14px;color:var(--muted);margin-top:4px;text-align:center}
+.tap-list{width:100%;background:var(--surf);border-radius:16px;overflow:hidden}
+.tap-list-hdr{padding:12px 16px;border-bottom:.5px solid var(--border);font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.tap-list-item{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:.5px solid var(--border);font-size:13px}
+.result-btns{display:flex;gap:10px;width:100%}
+
+/* ── LEARN ────────────────────────────── */
+.learn-hdr{padding:20px;border-bottom:.5px solid var(--border)}
+.learn-title{font-family:var(--fd);font-size:22px;font-weight:800;margin-bottom:4px}
+.lesson-list{padding:0 20px}
+.lesson-row{display:flex;align-items:center;gap:14px;padding:16px 0;border-bottom:.5px solid var(--border);cursor:pointer;background:none;border-left:none;border-right:none;border-top:none;width:100%;text-align:left}
+.lesson-row.locked{opacity:.4;cursor:default}
+.lesson-num{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:14px;font-weight:700}
+.ln-done{background:rgba(76,175,125,.15);color:var(--ok)}
+.ln-active{background:rgba(200,55,45,.12);color:var(--red)}
+.ln-locked{background:var(--surf2);color:var(--faint)}
+.lesson-name{font-size:15px;font-weight:500;margin-bottom:2px}
+.lesson-meta{font-size:12px;color:var(--muted)}
+.lesson-arrow{color:var(--faint);font-size:18px;margin-left:auto}
+
+/* LESSON VIEW */
+.lv-hdr{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:.5px solid var(--border);flex-shrink:0}
+.back-btn{width:36px;height:36px;border-radius:10px;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:none;color:var(--text);cursor:pointer}
+.lv-title{font-family:var(--fd);font-size:15px;font-weight:700;flex:1}
+.lv-step{font-size:12px;color:var(--muted)}
+.lv-prog{height:3px;background:var(--surf2)}
+.lv-prog-fill{height:100%;background:var(--red);transition:width .3s}
+.lv-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px}
+.lv-intro{background:var(--surf);border:.5px solid var(--border);border-radius:16px;padding:18px}
+.lv-intro-title{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--gold);margin-bottom:8px}
+.lv-intro-text{font-size:14px;line-height:1.65;opacity:.85}
+.info-block{background:var(--surf);border:.5px solid var(--border);border-radius:16px;padding:18px}
+.info-head{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--gold);margin-bottom:8px}
+.info-text{font-size:14px;line-height:1.65;opacity:.85}
+.beat-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin:4px 0}
+.bc{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:14px;font-weight:700;border:1.5px solid var(--border)}
+.bc.special{background:rgba(200,55,45,.25);border-color:var(--red);color:var(--red)}
+.bc.on{background:rgba(212,160,23,.15);border-color:rgba(212,160,23,.35);color:var(--gold)}
+.bc.off{background:var(--surf2);color:var(--faint)}
+.grid-label{font-size:11px;color:var(--muted);text-align:center;margin-top:4px}
+.lv-nav{padding:12px 20px;border-top:.5px solid var(--border);display:flex;gap:10px;flex-shrink:0}
+
+/* ── PROGRESS ─────────────────────────── */
+.prog-hdr{padding:20px;border-bottom:.5px solid var(--border)}
+.prog-title{font-family:var(--fd);font-size:22px;font-weight:800;margin-bottom:4px}
+.prog-sub{font-size:13px;color:var(--muted)}
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px 20px}
+.sum-card{background:var(--surf);border:.5px solid var(--border);border-radius:16px;padding:14px 10px;text-align:center}
+.sum-val{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--gold);margin-bottom:2px}
+.sum-lbl{font-size:10px;color:var(--muted)}
+.rings-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 20px 20px}
+.ring-card{background:var(--surf);border:.5px solid var(--border);border-radius:16px;padding:14px 8px;text-align:center}
+.trend{font-size:10px;margin-top:4px}
+.trend-up{color:var(--ok)}.trend-dn{color:var(--err)}.trend-st{color:var(--muted)}
+.sessions-ct{font-size:10px;color:var(--faint);margin-top:2px}
+.insight-card{background:var(--surf);border:.5px solid var(--border);border-radius:16px;padding:14px 16px;margin:0 20px 8px}
+.insight-lbl{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
+.insight-text{font-size:13px;line-height:1.55;opacity:.9}
+.hist-list{padding:0 20px 40px}
+.hist-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:.5px solid var(--border)}
+.hist-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.hist-mode{font-size:13px;font-weight:500}
+.hist-meta{font-size:11px;color:var(--muted);margin-top:1px}
+.hist-acc{font-family:var(--fd);font-size:16px;font-weight:700}
+.empty-state{padding:40px 20px;text-align:center}
+.empty-icon{font-size:40px;margin-bottom:16px}
+.empty-title{font-family:var(--fd);font-size:18px;font-weight:700;margin-bottom:8px}
+.empty-text{font-size:14px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div id="shell">
+  <div id="main">
+
+    <!-- ═══ HOME ═══════════════════════════════════════════════ -->
+    <div class="screen on" id="s-home">
+      <div class="home-hdr">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div class="logo">salsa<span>1</span></div>
+            <div class="home-sub">Beat timing training</div>
+          </div>
+          <div class="streak-badge" id="streak-badge" style="display:none">
+            <div class="streak-num" id="streak-num">0</div>
+            <div class="streak-lbl">day streak</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-row" id="home-rings">
+        <div class="stat-card"><div class="ring-wrap" id="ring-slow">
+          <svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="23" fill="none" stroke="var(--surf2)" stroke-width="5"/><circle id="rc-slow" cx="28" cy="28" r="23" fill="none" stroke="#4CAF7D" stroke-width="5" stroke-linecap="round" stroke-dasharray="144" stroke-dashoffset="144" style="transition:stroke-dashoffset .6s ease"/></svg>
+          <div class="ring-lbl" id="rl-slow">0%</div></div>
+          <div class="ring-name">Slow</div></div>
+        <div class="stat-card"><div class="ring-wrap">
+          <svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="23" fill="none" stroke="var(--surf2)" stroke-width="5"/><circle id="rc-medium" cx="28" cy="28" r="23" fill="none" stroke="#E8A827" stroke-width="5" stroke-linecap="round" stroke-dasharray="144" stroke-dashoffset="144" style="transition:stroke-dashoffset .6s ease"/></svg>
+          <div class="ring-lbl" id="rl-medium">0%</div></div>
+          <div class="ring-name">Medium</div></div>
+        <div class="stat-card"><div class="ring-wrap">
+          <svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="23" fill="none" stroke="var(--surf2)" stroke-width="5"/><circle id="rc-fast" cx="28" cy="28" r="23" fill="none" stroke="#E05252" stroke-width="5" stroke-linecap="round" stroke-dasharray="144" stroke-dashoffset="144" style="transition:stroke-dashoffset .6s ease"/></svg>
+          <div class="ring-lbl" id="rl-fast">0%</div></div>
+          <div class="ring-name">Fast</div></div>
+      </div>
+
+      <div class="slabel">Today's session</div>
+      <div class="daily-card" onclick="goTo('practice')">
+        <div class="daily-top">
+          <div><div class="daily-tag">Recommended</div><div class="daily-title" id="daily-title">10-Min Standard</div></div>
+          <div class="daily-dur" id="daily-dur">10 min</div>
+        </div>
+        <div class="daily-steps">
+          <div class="daily-step"><span class="daily-step-icon">♡</span>Pulse warmup</div>
+          <div class="daily-step"><span class="daily-step-icon">●</span>Count drill</div>
+          <div class="daily-step"><span class="daily-step-icon">◈</span>Catch the 1</div>
+          <div class="daily-step"><span class="daily-step-icon">▲</span>Score</div>
+        </div>
+      </div>
+
+      <div class="slabel">Training modes</div>
+      <div class="mode-grid">
+        <div class="mode-card" onclick="goTo('practice')">
+          <div class="mode-icon-wrap">🥁</div>
+          <div class="mode-name">Guided Practice</div>
+          <div class="mode-desc">Tap along with real-time feedback</div>
+          <div class="mode-badge">ACTIVE</div>
+        </div>
+        <div class="mode-card" onclick="goTo('catch')">
+          <div class="mode-icon-wrap">🎯</div>
+          <div class="mode-name">Catch the 1</div>
+          <div class="mode-desc">Find the downbeat by ear</div>
+        </div>
+        <div class="mode-card" onclick="goTo('learn')">
+          <div class="mode-icon-wrap">◎</div>
+          <div class="mode-name">Lessons</div>
+          <div class="mode-desc">Structured ear training</div>
+        </div>
+        <div class="mode-card" onclick="goTo('progress')">
+          <div class="mode-icon-wrap">▲</div>
+          <div class="mode-name">Progress</div>
+          <div class="mode-desc">Insights and session history</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PRACTICE ════════════════════════════════════════════ -->
+    <div class="screen" id="s-practice">
+      <div class="prac-hdr">
+        <div class="prac-meta">
+          <span class="level-pill" id="prac-level-pill">LEVEL 1 · VISUAL AIDS</span>
+          <span class="acc-num" id="prac-acc">—</span>
+        </div>
+        <div class="tempo-row" id="prac-tempo-row">
+          <button class="tempo-btn sel" data-t="slow" style="color:#4CAF7D" onclick="selectTempo('slow',this)">
+            <span style="font-family:var(--fd);font-size:13px;font-weight:700">Slow</span>
+            <span class="tempo-bpm">78 BPM</span>
+          </button>
+          <button class="tempo-btn" data-t="medium" style="color:#E8A827" onclick="selectTempo('medium',this)">
+            <span style="font-family:var(--fd);font-size:13px;font-weight:700">Medium</span>
+            <span class="tempo-bpm">100 BPM</span>
+          </button>
+          <button class="tempo-btn" data-t="fast" style="color:#E05252" onclick="selectTempo('fast',this)">
+            <span style="font-family:var(--fd);font-size:13px;font-weight:700">Fast</span>
+            <span class="tempo-bpm">120 BPM</span>
+          </button>
+        </div>
+      </div>
+      <div class="count-area">
+        <div class="count-big" id="count-big" style="color:var(--text)">—</div>
+        <div class="count-sub" id="count-sub">Press Start to begin</div>
+      </div>
+      <div class="pips" id="pips"></div>
+      <div class="phrase-area" id="phrase-area">
+        <div class="phrase-top"><span>Phrase position</span><span id="phrase-pos">0 / 8</span></div>
+        <div class="phrase-track"><div class="phrase-fill" id="phrase-fill" style="width:0%"></div></div>
+      </div>
+      <div class="tap-zone">
+        <button class="tap-btn" id="tap-btn" onpointerdown="handlePracTap(event)">
+          <span class="tap-btn-icon">🥁</span>
+          <span class="tap-btn-label" id="tap-label">TAP THE BEAT</span>
+          <span class="tap-btn-sub" id="tap-sub">every count</span>
+        </button>
+        <div class="fb-pill fb-neutral" id="fb-pill">Ready when you are</div>
+        <div class="running-stats" id="run-stats" style="display:none">
+          <span id="rs-taps">0 taps</span>
+          <span id="rs-err">—</span>
+          <span id="rs-good">0 on time</span>
+        </div>
+      </div>
+      <div class="ctrl-row">
+        <button class="ctrl" id="metro-btn" onclick="toggleMetro()">
+          <span>♩</span><span class="cl">Metro</span>
+        </button>
+        <button class="play-ctrl" id="play-btn" onclick="togglePlay()">
+          <span id="play-icon">▶</span> <span id="play-lbl">Start</span>
+        </button>
+        <button class="ctrl" id="mode-btn" onclick="cycleTapMode()">
+          <span id="mode-icon">●</span><span class="cl" id="mode-lbl">Beat</span>
+        </button>
+      </div>
+      <div class="diff-row" id="diff-row">
+        <button class="diff-btn sel" data-d="1" onclick="selectDiff(1,this)">L1</button>
+        <button class="diff-btn" data-d="2" onclick="selectDiff(2,this)">L2</button>
+        <button class="diff-btn" data-d="3" onclick="selectDiff(3,this)">L3</button>
+        <button class="diff-btn" data-d="4" onclick="selectDiff(4,this)">L4</button>
+      </div>
+    </div>
+
+    <!-- ═══ CATCH THE 1 ════════════════════════════════════════ -->
+    <div class="screen" id="s-catch">
+      <div class="catch-hdr">
+        <div class="catch-title">Catch the 1</div>
+        <div class="catch-sub">Tap when you hear count "1" arrive. No numbers shown.</div>
+      </div>
+      <!-- Setup -->
+      <div id="catch-setup" class="setup-body">
+        <div>
+          <div class="setup-label">Difficulty</div>
+          <div class="diff-grid">
+            <button class="diff-card sel" data-cd="1" onclick="selectCatchDiff(1,this)">
+              <span class="diff-d">L1</span>
+              <span class="diff-sub">Count-in + slow</span>
+            </button>
+            <button class="diff-card" data-cd="2" onclick="selectCatchDiff(2,this)">
+              <span class="diff-d">L2</span>
+              <span class="diff-sub">Count-in only</span>
+            </button>
+            <button class="diff-card" data-cd="3" onclick="selectCatchDiff(3,this)">
+              <span class="diff-d">L3</span>
+              <span class="diff-sub">No aids</span>
+            </button>
+            <button class="diff-card" data-cd="4" onclick="selectCatchDiff(4,this)">
+              <span class="diff-d">L4</span>
+              <span class="diff-sub">Pure ear</span>
+            </button>
+          </div>
+        </div>
+        <div>
+          <div class="setup-label">Tempo</div>
+          <div class="tempo-pick">
+            <button class="tp-btn" data-ct="slow" style="border-color:#4CAF7D80;background:rgba(76,175,125,.1);color:#4CAF7D" onclick="selectCatchTempo('slow',this)">
+              <span style="font-family:var(--fd);font-size:13px;font-weight:700">Slow</span>
+              <span class="tp-bpm">78 BPM</span>
+            </button>
+            <button class="tp-btn" data-ct="medium" onclick="selectCatchTempo('medium',this)">
+              <span style="font-family:var(--fd);font-size:13px;font-weight:700">Medium</span>
+              <span class="tp-bpm">100 BPM</span>
+            </button>
+            <button class="tp-btn" data-ct="fast" onclick="selectCatchTempo('fast',this)">
+              <span style="font-family:var(--fd);font-size:13px;font-weight:700">Fast</span>
+              <span class="tp-bpm">120 BPM</span>
+            </button>
+          </div>
+        </div>
+        <div class="score-card">
+          <div class="setup-label" style="margin-bottom:8px">Scoring</div>
+          <div class="score-row"><span class="score-tag" style="color:var(--ok)">Perfect</span><span style="color:var(--muted)">≤50ms from "1"</span></div>
+          <div class="score-row"><span class="score-tag" style="color:var(--warn)">Good</span><span style="color:var(--muted)">≤100ms</span></div>
+          <div class="score-row"><span class="score-tag" style="color:var(--err)">Off</span><span style="color:var(--muted)">≤200ms</span></div>
+          <div class="score-row"><span class="score-tag" style="color:var(--faint)">Miss</span><span style="color:var(--muted)">&gt;200ms / wrong beat</span></div>
+        </div>
+        <button class="big-btn" onclick="startCatch()">Begin →</button>
+      </div>
+      <!-- Playing -->
+      <div id="catch-play" style="display:none;flex:1;flex-direction:column">
+        <div style="padding:16px 20px 12px;flex-shrink:0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <span style="font-size:12px;color:var(--muted)" id="catch-play-meta">L1 · 78 BPM</span>
+            <span class="acc-num" id="catch-acc">—</span>
+          </div>
+          <div class="pips" id="catch-pips"></div>
+        </div>
+        <div class="play-area">
+          <button class="catch-tap-btn" id="catch-tap-btn" onpointerdown="handleCatchTap(event)">
+            <span class="catch-tap-icon">🎯</span>
+            <span class="catch-tap-label">TAP THE "1"</span>
+            <span class="catch-tap-hint">use your ear</span>
+          </button>
+          <div class="fb-pill fb-neutral" id="catch-fb">Listening...</div>
+          <div class="tally" id="catch-tally"></div>
+        </div>
+        <div style="padding:12px 20px;border-top:.5px solid var(--border)">
+          <button class="big-btn secondary" onclick="finishCatch()">Finish & Save</button>
+        </div>
+      </div>
+      <!-- Result -->
+      <div id="catch-result" style="display:none">
+        <div class="result-body">
+          <div style="text-align:center">
+            <div class="result-score" id="result-score">0%</div>
+            <div class="result-sub" id="result-sub">0 of 0 on the "1"</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:4px" id="result-err"></div>
+          </div>
+          <div class="tap-list">
+            <div class="tap-list-hdr">Tap breakdown</div>
+            <div id="tap-breakdown" style="max-height:200px;overflow-y:auto"></div>
+          </div>
+          <div class="result-btns">
+            <button class="big-btn secondary" style="flex:1;margin-top:0" onclick="resetCatch()">Try Again</button>
+            <button class="big-btn" style="flex:2;margin-top:0" onclick="startCatch()">Next Round →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ LEARN ════════════════════════════════════════════════ -->
+    <div class="screen" id="s-learn">
+      <div id="learn-list-view">
+        <div class="learn-hdr">
+          <div class="learn-title">Lessons</div>
+          <div style="font-size:13px;color:var(--muted)">Build your timing ear from first principles.</div>
+        </div>
+        <div class="lesson-list" id="lesson-list"></div>
+      </div>
+      <div id="learn-lesson-view" style="display:none;flex:1;flex-direction:column;min-height:100%"></div>
+    </div>
+
+    <!-- ═══ PROGRESS ═════════════════════════════════════════════ -->
+    <div class="screen" id="s-progress">
+      <div class="prog-hdr">
+        <div class="prog-title">Your Progress</div>
+        <div class="prog-sub" id="prog-sub">Loading...</div>
+      </div>
+      <div id="progress-body"></div>
+    </div>
+
+  </div><!-- /main -->
+
+  <!-- BOTTOM NAV -->
+  <nav id="nav">
+    <button class="nav-btn act" id="nb-home" onclick="goTo('home')"><span class="nav-icon">⌂</span>Home</button>
+    <button class="nav-btn" id="nb-learn" onclick="goTo('learn')"><span class="nav-icon">◎</span>Learn</button>
+    <button class="nav-btn" id="nb-practice" onclick="goTo('practice')"><span class="nav-icon">●</span>Practice</button>
+    <button class="nav-btn" id="nb-catch" onclick="goTo('catch')"><span class="nav-icon">◈</span>Catch 1</button>
+    <button class="nav-btn" id="nb-progress" onclick="goTo('progress')"><span class="nav-icon">▲</span>Progress</button>
+  </nav>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// AUDIO ENGINE — Web Audio lookahead scheduler
+// ═══════════════════════════════════════════════════════════
+const LOOKAHEAD = 0.1      // seconds ahead to schedule
+const SCHED_INTERVAL = 25  // ms between scheduler runs
+const BEATS = 8
+
+class AudioEngine {
+  constructor(){
+    this.ctx = null; this.masterGain = null
+    this._timer = null; this._nextBeat = 0; this._beat = 0
+    this._bpm = 80; this._running = false
+    this._metronome = false; this._latency = 0
+    this._history = []; this._onBeat = null
+  }
+  async init(){
+    if(this.ctx) return
+    this.ctx = new(window.AudioContext||window.webkitAudioContext)()
+    this.masterGain = this.ctx.createGain()
+    this.masterGain.gain.value = 0.7
+    this.masterGain.connect(this.ctx.destination)
+    if(this.ctx.state==='suspended') await this.ctx.resume()
+  }
+  async resume(){ if(this.ctx?.state==='suspended') await this.ctx.resume() }
+
+  start(bpm, countIn=4, onBeat=null){
+    if(this._running) this.stop()
+    this._bpm=bpm; this._onBeat=onBeat
+    this._beat=-countIn; this._history=[]; this._running=true
+    this._nextBeat=this.ctx.currentTime+0.1
+    this._sched()
+  }
+  stop(){ this._running=false; clearTimeout(this._timer); this._history=[] }
+
+  _sched(){
+    if(!this._running) return
+    const now=this.ctx.currentTime
+    while(this._nextBeat < now+LOOKAHEAD){
+      this._scheduleBeat(this._beat, this._nextBeat)
+      this._nextBeat += 60/this._bpm
+      this._beat++
+      if(this._beat>=BEATS) this._beat=0
+    }
+    this._timer=setTimeout(()=>this._sched(), SCHED_INTERVAL)
+  }
+  _scheduleBeat(idx, t){
+    const isCountIn = idx<0
+    const phraseIdx = isCountIn ? idx : idx%BEATS
+    const isOne = phraseIdx===0
+    if(!isCountIn){
+      this._history.push({time:t, beatIndex:phraseIdx})
+      if(this._history.length>32) this._history.shift()
+    }
+    if(this._metronome||isOne||isCountIn) this._click(t,isOne,isCountIn)
+    if(this._onBeat){
+      const delay=(t-this.ctx.currentTime)*1000
+      setTimeout(()=>{ if(this._running) this._onBeat(phraseIdx,t,isCountIn) }, Math.max(0,delay))
+    }
+  }
+  _click(t, isOne, isCountIn){
+    const osc=this.ctx.createOscillator()
+    const g=this.ctx.createGain()
+    osc.connect(g); g.connect(this.masterGain)
+    osc.frequency.value = isOne?900:isCountIn?700:500
+    osc.type='sine'
+    const v=isOne?.5:isCountIn?.35:.2
+    g.gain.setValueAtTime(0,t)
+    g.gain.linearRampToValueAtTime(v,t+.003)
+    g.gain.exponentialRampToValueAtTime(.001,t+.08)
+    osc.start(t); osc.stop(t+.1)
+  }
+  scoreTap(tapT){
+    const comp = (tapT??this.ctx.currentTime) - this._latency
+    if(!this._history.length) return {error:null,rating:'early',isOne:false}
+    const beatDur=60/this._bpm
+    let nearest=null, minD=Infinity
+    for(const b of this._history){
+      const d=Math.abs(comp-b.time)
+      if(d<minD){minD=d;nearest=b}
+    }
+    if(!nearest) return {error:null,rating:'miss',isOne:false}
+    const err=comp-nearest.time
+    const errMs=Math.round(err*1000)
+    const abs=Math.abs(err)
+    const isOne=nearest.beatIndex===0
+    let rating = abs<=.05?'perfect':abs<=.1?'good':abs<=.2?'off':'miss'
+    const dir = err<-.02?'early':err>.02?'late':'center'
+    const scores={perfect:100,good:75,off:40,miss:0}
+    return{errMs,absErrMs:Math.abs(errMs),rating,direction:dir,isOne,nearestBeat:nearest.beatIndex,score:scores[rating]??0}
+  }
+  now(){ return this.ctx?.currentTime??0 }
+  setMetronome(v){ this._metronome=v }
+  setLatency(ms){ this._latency=ms/1000 }
+  get isRunning(){ return this._running }
+  get bpm(){ return this._bpm }
+}
+const engine = new AudioEngine()
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+const TEMPOS = { slow:{bpm:78,color:'#4CAF7D'}, medium:{bpm:100,color:'#E8A827'}, fast:{bpm:120,color:'#E05252'} }
+const DIFF = {
+  1:{label:'Level 1',showCount:true,showPhrase:true,countIn:4},
+  2:{label:'Level 2',showCount:false,showPhrase:true,countIn:4},
+  3:{label:'Level 3',showCount:false,showPhrase:true,countIn:0},
+  4:{label:'Level 4',showCount:false,showPhrase:false,countIn:0}
+}
+
+let S = {
+  screen:'home', isPlaying:false,
+  tempo:'slow', diff:1, tapMode:'beat',
+  metro:false, currentBeat:-1,
+  sessionTaps:[], sessionStart:null, lastFeedback:null,
+  catchDiff:1, catchTempo:'slow', catchPhase:'setup',
+  catchTaps:[], catchStart:null,
+  completedLessons:new Set(), activeLesson:null, lessonStep:0,
+  sessions: JSON.parse(localStorage.getItem('s1sessions')||'[]'),
+  prefs: JSON.parse(localStorage.getItem('s1prefs')||'{"latency":0}'),
+}
+
+function saveSession(rec){
+  S.sessions.push(rec)
+  if(S.sessions.length>200) S.sessions=S.sessions.slice(-200)
+  localStorage.setItem('s1sessions', JSON.stringify(S.sessions))
+}
+function saveLessons(){
+  localStorage.setItem('s1lessons', JSON.stringify([...S.completedLessons]))
+}
+
+// Load persisted data
+try{ S.completedLessons=new Set(JSON.parse(localStorage.getItem('s1lessons')||'[]')) }catch(e){}
+
+// ═══════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function goTo(name){
+  if(S.isPlaying && name!=='practice') { stopPlay(); }
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'))
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('act'))
+  document.getElementById('s-'+name).classList.add('on')
+  const nb=document.getElementById('nb-'+name)
+  if(nb) nb.classList.add('act')
+  S.screen=name
+  if(name==='progress') renderProgress()
+  if(name==='learn') renderLearnList()
+  if(name==='home') renderHome()
+}
+
+// ═══════════════════════════════════════════════════════════
+// HOME
+// ═══════════════════════════════════════════════════════════
+function renderHome(){
+  const stats=computeStats()
+  // Streak badge
+  if(stats.streak>0){
+    document.getElementById('streak-badge').style.display='block'
+    document.getElementById('streak-num').textContent=stats.streak
+  }
+  // Rings
+  updateRing('slow',stats.byTempo.slow.accuracy)
+  updateRing('medium',stats.byTempo.medium.accuracy)
+  updateRing('fast',stats.byTempo.fast.accuracy)
+  // Recommend session
+  const slowAcc=stats.byTempo.slow.accuracy
+  const rec = slowAcc<50?{label:'5-Min Quick',dur:5}:slowAcc<75?{label:'10-Min Standard',dur:10}:{label:'15-Min Focused',dur:15}
+  document.getElementById('daily-title').textContent=rec.label
+  document.getElementById('daily-dur').textContent=rec.dur+' min'
+}
+function updateRing(id, pct){
+  const circ=144; const offset=circ-(pct/100)*circ
+  const c=document.getElementById('rc-'+id)
+  const l=document.getElementById('rl-'+id)
+  if(c) setTimeout(()=>c.setAttribute('stroke-dashoffset',offset),100)
+  if(l) l.textContent=pct+'%'
+}
+
+// ═══════════════════════════════════════════════════════════
+// PRACTICE ENGINE
+// ═══════════════════════════════════════════════════════════
+function initPips(containerId){
+  const row=document.getElementById(containerId)
+  if(!row) return
+  row.innerHTML=''
+  for(let i=0;i<8;i++){
+    const p=document.createElement('div')
+    p.className='pip'+(i===0?' one':'')
+    p.id=(containerId==='pips'?'pp':'cp')+i
+    row.appendChild(p)
+  }
+}
+
+async function togglePlay(){
+  if(S.isPlaying){ stopPlay(); return }
+  await engine.init()
+  await engine.resume()
+  S.isPlaying=true; S.sessionTaps=[]; S.sessionStart=Date.now(); S.lastFeedback=null
+  const dc=DIFF[S.diff]; const tc=TEMPOS[S.tempo]
+  engine.setMetronome(S.metro)
+  engine.setLatency(S.prefs.latency||0)
+  engine.start(tc.bpm, dc.countIn, (beatIdx, t, isCountIn)=>{
+    if(!isCountIn){ S.currentBeat=beatIdx; onBeat(beatIdx) }
+    else { updateCountDisplay(null,true,beatIdx) }
+  })
+  document.getElementById('play-btn').classList.add('running')
+  document.getElementById('play-icon').textContent='⏹'
+  document.getElementById('play-lbl').textContent='Stop'
+  document.getElementById('tap-btn').classList.add('playing')
+  document.getElementById('count-sub').textContent=dc.countIn>0?'Count-in...':S.tapMode==='one'?'listening...':'tap every beat'
+  document.getElementById('diff-row').style.opacity='.5'
+  initPips('pips')
+}
+
+function stopPlay(){
+  engine.stop(); S.isPlaying=false
+  // Save session
+  const sr=buildSessionRecord(S.sessionTaps, S.tempo, S.tapMode==='one'?'catch-one':'guided', S.sessionStart)
+  if(sr && sr.tapCount>=4){ saveSession(sr) }
+  // Reset UI
+  document.getElementById('play-btn').classList.remove('running')
+  document.getElementById('play-icon').textContent='▶'
+  document.getElementById('play-lbl').textContent='Start'
+  document.getElementById('tap-btn').classList.remove('playing')
+  document.getElementById('count-big').textContent='—'
+  document.getElementById('count-big').style.color='var(--text)'
+  document.getElementById('count-sub').textContent='Press Start to begin'
+  document.getElementById('diff-row').style.opacity='1'
+  document.querySelectorAll('.pip').forEach((p,i)=>{ p.className='pip'+(i===0?' one':'') })
+  document.getElementById('phrase-fill').style.width='0%'
+  document.getElementById('phrase-pos').textContent='0 / 8'
+  document.getElementById('prac-acc').textContent='—'
+  document.getElementById('run-stats').style.display='none'
+  setFeedback('fb-pill','Stopped. Press ▶ to restart.','neutral')
+  S.sessionTaps=[]; S.currentBeat=-1
+}
+
+function onBeat(idx){
+  const isOne=idx===0
+  const dc=DIFF[S.diff]
+  // Count display
+  updateCountDisplay(idx,false,null)
+  // Pips
+  for(let i=0;i<8;i++){
+    const p=document.getElementById('pp'+i)
+    if(!p) continue
+    p.className='pip'+(i===0?' one':'')+(i===idx?' cur '+(isOne?'one':'other'):'')
+  }
+  // Phrase bar
+  if(dc.showPhrase){
+    document.getElementById('phrase-fill').style.width=((idx+1)/8*100)+'%'
+    document.getElementById('phrase-fill').style.background=isOne?'var(--red)':'var(--gold)'
+    document.getElementById('phrase-pos').textContent=(idx+1)+' / 8'
+  }
+  // Tap mode hint
+  if(S.tapMode==='one' && isOne) document.getElementById('count-sub').textContent='← TAP NOW →'
+  else if(S.tapMode==='one') document.getElementById('count-sub').textContent='listening...'
+}
+
+function updateCountDisplay(idx, isCountIn, countInIdx){
+  const el=document.getElementById('count-big')
+  const dc=DIFF[S.diff]
+  if(isCountIn){
+    el.textContent=Math.abs(countInIdx)
+    el.style.color='var(--muted)'
+    return
+  }
+  if(dc.showCount){ el.textContent=idx+1 }
+  else { el.textContent='●' }
+  el.style.color=idx===0?'var(--red)':'var(--text)'
+}
+
+function handlePracTap(e){
+  e.preventDefault()
+  if(!engine.isRunning) return
+  const tapT=engine.now()
+  const r=engine.scoreTap(tapT)
+  S.sessionTaps.push({...r,ts:Date.now()})
+  // Ripple
+  const btn=document.getElementById('tap-btn')
+  const rip=document.createElement('div'); rip.className='ripple-el'; btn.appendChild(rip)
+  setTimeout(()=>rip.remove(),500)
+  // Feedback
+  const fb=buildFeedback(r)
+  setFeedback('fb-pill',fb.msg,fb.type)
+  // Running stats
+  updateRunStats()
+  // Haptic
+  if(navigator.vibrate) navigator.vibrate(r.rating==='perfect'?[10,20,10]:r.rating==='miss'?[60]:[8])
+}
+
+function buildFeedback(r){
+  if(r.rating==='perfect') return r.isOne?{msg:'The "1" — Perfect!',type:'perfect'}:{msg:'On time ✓',type:'perfect'}
+  if(r.rating==='good') return {msg:r.direction==='early'?'Slightly early':'Slightly late',type:'good'}
+  if(r.rating==='off') return {msg:r.direction==='early'?'Early — relax':'Late — anticipate',type:'off'}
+  return {msg:r.isOne===false?'Not the "1" — keep listening':'Missed — re-orient',type:'miss'}
+}
+
+function updateRunStats(){
+  const taps=S.sessionTaps, n=taps.length
+  if(n===0) return
+  const good=taps.filter(t=>['perfect','good'].includes(t.rating)).length
+  const acc=Math.round(good/n*100)
+  const errs=taps.filter(t=>t.absErrMs!=null).map(t=>t.absErrMs)
+  const avgErr=errs.length?Math.round(errs.reduce((a,b)=>a+b,0)/errs.length):null
+  document.getElementById('prac-acc').textContent=acc+'%'
+  document.getElementById('run-stats').style.display='flex'
+  document.getElementById('rs-taps').textContent=n+' taps'
+  document.getElementById('rs-err').textContent=avgErr!==null?'avg '+avgErr+'ms off':'—'
+  document.getElementById('rs-good').textContent=good+' on time'
+}
+
+function setFeedback(elId, msg, type){
+  const el=document.getElementById(elId)
+  if(!el) return
+  el.textContent=msg
+  el.className='fb-pill fb-'+type
+}
+
+function toggleMetro(){
+  S.metro=!S.metro; engine.setMetronome(S.metro)
+  const btn=document.getElementById('metro-btn')
+  btn.classList.toggle('gold-on',S.metro)
+}
+function cycleTapMode(){
+  S.tapMode=S.tapMode==='beat'?'one':'beat'
+  const isOne=S.tapMode==='one'
+  document.getElementById('mode-icon').textContent=isOne?'①':'●'
+  document.getElementById('mode-lbl').textContent=isOne?'The 1':'Beat'
+  document.getElementById('tap-label').textContent=isOne?'TAP THE "1"':'TAP THE BEAT'
+  document.getElementById('tap-sub').textContent=isOne?'only on count 1':'every count'
+  document.getElementById('mode-btn').classList.toggle('red-on',isOne)
+}
+function selectTempo(t,btn){
+  if(S.isPlaying) return
+  S.tempo=t
+  document.querySelectorAll('.tempo-btn').forEach(b=>b.classList.remove('sel'))
+  btn.classList.add('sel')
+}
+function selectDiff(d,btn){
+  if(S.isPlaying) return
+  S.diff=d
+  document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('sel'))
+  btn.classList.add('sel')
+  const dc=DIFF[d]
+  document.getElementById('prac-level-pill').textContent=dc.label+' · '+(dc.showCount?'Visual count':'No count')
+  document.getElementById('phrase-area').style.display=dc.showPhrase?'block':'none'
+}
+
+// ═══════════════════════════════════════════════════════════
+// CATCH THE 1
+// ═══════════════════════════════════════════════════════════
+function selectCatchDiff(d,btn){
+  S.catchDiff=d
+  document.querySelectorAll('.diff-card').forEach(b=>b.classList.remove('sel'))
+  btn.classList.add('sel')
+}
+function selectCatchTempo(t,btn){
+  S.catchTempo=t
+  const tc=TEMPOS[t]
+  document.querySelectorAll('.tp-btn').forEach(b=>{
+    b.style.borderColor='var(--border)'; b.style.background='transparent'; b.style.color='var(--muted)'
+  })
+  btn.style.borderColor=tc.color+'80'; btn.style.background=tc.color+'20'; btn.style.color=tc.color
+}
+async function startCatch(){
+  await engine.init(); await engine.resume()
+  S.catchTaps=[]; S.catchStart=Date.now()
+  S.catchPhase='playing'
+  const dc=DIFF[S.catchDiff], tc=TEMPOS[S.catchTempo]
+  document.getElementById('catch-setup').style.display='none'
+  document.getElementById('catch-result').style.display='none'
+  document.getElementById('catch-play').style.display='flex'
+  document.getElementById('catch-play-meta').textContent='L'+S.catchDiff+' · '+tc.bpm+' BPM'
+  document.getElementById('catch-acc').textContent='—'
+  document.getElementById('catch-fb').textContent='Listening...'
+  document.getElementById('catch-fb').className='fb-pill fb-neutral'
+  document.getElementById('catch-tally').textContent=''
+  initPips('catch-pips')
+  engine.setMetronome(false)
+  engine.start(tc.bpm, dc.countIn, (beatIdx,t,isCountIn)=>{
+    if(isCountIn) return
+    S.currentBeat=beatIdx
+    // Pips for catch screen
+    for(let i=0;i<8;i++){
+      const p=document.getElementById('cp'+i)
+      if(!p) continue
+      p.className='pip'+(i===0?' one':'')+(i===beatIdx?' cur '+(beatIdx===0?'one':'other'):'')
+    }
+    // Flash the tap button on the 1
+    const tbtn=document.getElementById('catch-tap-btn')
+    if(tbtn){
+      tbtn.classList.toggle('one-lit', beatIdx===0)
+    }
+  })
+}
+function handleCatchTap(e){
+  e.preventDefault()
+  if(!engine.isRunning) return
+  const tapT=engine.now()
+  const r=engine.scoreTap(tapT)
+  S.catchTaps.push({...r,ts:Date.now()})
+  const fb=buildFeedback(r)
+  setFeedback('catch-fb',fb.msg,fb.type)
+  if(navigator.vibrate) navigator.vibrate(r.rating==='perfect'?[10,20,10]:r.rating==='miss'?[60]:[8])
+  // Ripple
+  const btn=document.getElementById('catch-tap-btn')
+  const rip=document.createElement('div'); rip.className='ripple-el'; btn.appendChild(rip)
+  setTimeout(()=>rip.remove(),500)
+  // Update tally
+  const oneTaps=S.catchTaps.filter(t=>t.isOne)
+  const goodOneTaps=oneTaps.filter(t=>['perfect','good'].includes(t.rating))
+  if(oneTaps.length>0){
+    const acc=Math.round(goodOneTaps.length/oneTaps.length*100)
+    document.getElementById('catch-acc').textContent=acc+'%'
+    document.getElementById('catch-tally').textContent=goodOneTaps.length+' correct / '+oneTaps.length+' attempts on the "1"'
+  }
+}
+function finishCatch(){
+  engine.stop()
+  S.catchPhase='result'
+  document.getElementById('catch-play').style.display='none'
+  document.getElementById('catch-result').style.display='block'
+  // Compute result
+  const taps=S.catchTaps
+  const oneTaps=taps.filter(t=>t.isOne)
+  const goodOneTaps=oneTaps.filter(t=>['perfect','good'].includes(t.rating))
+  const acc=oneTaps.length>0?Math.round(goodOneTaps.length/oneTaps.length*100):0
+  const errs=taps.filter(t=>t.absErrMs!=null).map(t=>t.absErrMs)
+  const avgErr=errs.length?Math.round(errs.reduce((a,b)=>a+b,0)/errs.length):null
+  const color=acc>=70?'var(--ok)':acc>=45?'var(--warn)':'var(--err)'
+  document.getElementById('result-score').textContent=acc+'%'
+  document.getElementById('result-score').style.color=color
+  document.getElementById('result-sub').textContent=goodOneTaps.length+' of '+oneTaps.length+' attempts landed on the "1"'
+  document.getElementById('result-err').textContent=avgErr!==null?'Average timing error: '+avgErr+'ms':''
+  // Breakdown list
+  const bd=document.getElementById('tap-breakdown')
+  bd.innerHTML=''
+  taps.slice(-12).reverse().forEach(t=>{
+    const row=document.createElement('div'); row.className='tap-list-item'
+    const beatLabel=t.isOne?'Beat 1':'Beat '+(( t.nearestBeat??0)+1)
+    const errLabel=t.errMs!=null?(t.errMs>0?'+':'')+t.errMs+'ms':' — '
+    const tc=t.rating==='perfect'?'var(--ok)':t.rating==='good'?'var(--warn)':'var(--err)'
+    row.innerHTML=`<span style="color:${t.isOne?'var(--text)':'var(--faint)'}">${beatLabel}</span><span style="color:${tc}">${errLabel} ${t.rating}</span>`
+    bd.appendChild(row)
+  })
+  // Save
+  const sr=buildSessionRecord(S.catchTaps, S.catchTempo, 'catch-one', S.catchStart)
+  if(sr && sr.tapCount>=2) saveSession(sr)
+}
+function resetCatch(){
+  engine.stop()
+  S.catchPhase='setup'; S.catchTaps=[]
+  document.getElementById('catch-setup').style.display='flex'
+  document.getElementById('catch-play').style.display='none'
+  document.getElementById('catch-result').style.display='none'
+}
+
+// ═══════════════════════════════════════════════════════════
+// LESSONS
+// ═══════════════════════════════════════════════════════════
+const LESSONS=[
+  {id:1,title:'The Steady Pulse',sub:'Feeling 4/4 time',dur:3,locked:false,intro:'The pulse is the heartbeat of all salsa. A steady, unchanging beat like a clock. Before finding the "1," you must feel the pulse so naturally you stop thinking about it.',sections:[
+    {type:'text',h:'What you are feeling',b:'Tap your foot. That steady thump is the pulse. In salsa, it runs at 70–140 beats per minute. Every melody and lyric sits on top of this invisible grid.'},
+    {type:'beat-grid',label:'All 8 beats are equal for now',highlighted:[1,2,3,4,5,6,7,8],special:[]},
+    {type:'text',h:'Your drill',b:'Go to Guided Practice → Slow → Beat mode. Tap every single beat for 2 minutes. Target: ±80ms accuracy on 80% of taps.'},
+  ]},
+  {id:2,title:'Counting 1–8',sub:'Salsa phrasing basics',dur:4,locked:false,intro:'Salsa phrases in groups of 8 beats. Dancers move on 1–2–3 (pause) 5–6–7 (pause). The 4 and 8 are the breath between movements.',sections:[
+    {type:'beat-grid',label:'Steps on shaded beats. Pauses on 4 and 8.',highlighted:[1,2,3,5,6,7],special:[1]},
+    {type:'text',h:'Two halves',b:'Counts 1–4 are the "A" phrase (primera). Counts 5–8 are the "B" phrase (segunda). Together they form one complete musical sentence of 8 beats.'},
+  ]},
+  {id:3,title:'Why the "1" Matters',sub:'The downbeat and phrase start',dur:5,locked:false,intro:'Count "1" is where everything resolves. The bass lands hardest here. The dancer\'s break step reconnects. Missing it is like starting a sentence mid-word.',sections:[
+    {type:'beat-grid',label:'The "1" is the anchor of every phrase',highlighted:[1,2,3,5,6,7],special:[1]},
+    {type:'text',h:'Count 1 vs Count 5',b:'Both start movement. But "1" has a sense of arrival — the phrase ends and begins again. "5" is continuation. Listen for the bass hitting heavier on count 1.'},
+    {type:'text',h:'Your drill',b:'Try Catch the 1 → Level 1. You get a count-in and slow tempo. Tap when you feel the biggest beat landing. See your error in milliseconds.'},
+  ]},
+  {id:4,title:'Hearing the Clave',sub:'The rhythmic backbone',dur:5,locked:true,intro:'The clave is a 2-bar rhythmic pattern — the skeleton everything hangs on. You don\'t tap to it, but you feel where you are within it.',sections:[
+    {type:'text',h:'3-2 Clave (most common)',b:'Bar 1: beats 1, 2&, 4. Bar 2: beats 2, 3. Once you feel the clave without counting it, you will never lose the "1" again.'},
+    {type:'clave',label:'3-2 Clave across 2 bars',b1:[1,0,1,0,0,0,1,0],b2:[0,0,1,0,1,0,0,0]},
+  ]},
+  {id:5,title:'Phrase Starts & Breaks',sub:'Catching musical transitions',dur:6,locked:true,intro:'Salsa musicians signal phrase starts with fills, horn stabs, and bass variations. Learning to hear these is how you keep orientation even when distracted.',sections:[
+    {type:'text',h:'Musical signposts',b:'A bass fill, a horn hit, or a vocal phrase landing on count 1 — these are your anchors. When the music resets, that is the "1." Start counting from there.'},
+  ]},
+  {id:6,title:'Recovery After Breaks',sub:'Finding the beat again',dur:7,locked:true,intro:'Every dancer loses the beat. The skill is recovering it in 4 beats or fewer — silently, invisibly.',sections:[
+    {type:'text',h:'The 4-beat recovery rule',b:'When lost: (1) stop tapping. (2) find the bass. (3) count up to 4. (4) the next count after 4 that feels heavy is probably the "1." Re-enter.'},
+  ]},
+]
+
+function renderLearnList(){
+  document.getElementById('learn-list-view').style.display='block'
+  document.getElementById('learn-lesson-view').style.display='none'
+  const list=document.getElementById('lesson-list'); list.innerHTML=''
+  LESSONS.forEach(l=>{
+    const done=S.completedLessons.has(l.id)
+    const locked=l.locked && !S.completedLessons.has(l.id-1)
+    const btn=document.createElement('button')
+    btn.className='lesson-row'+(locked?' locked':'')
+    if(locked) btn.disabled=true
+    btn.innerHTML=`
+      <div class="lesson-num ${done?'ln-done':locked?'ln-locked':'ln-active'}">${done?'✓':locked?'🔒':l.id}</div>
+      <div><div class="lesson-name">${l.title}</div><div class="lesson-meta">${l.sub} · ${l.dur} min</div></div>
+      <span class="lesson-arrow">›</span>`
+    if(!locked) btn.onclick=()=>openLesson(l)
+    list.appendChild(btn)
+  })
+}
+function openLesson(l){
+  S.activeLesson=l; S.lessonStep=0
+  document.getElementById('learn-list-view').style.display='none'
+  const lv=document.getElementById('learn-lesson-view')
+  lv.style.display='flex'; renderLessonStep()
+}
+function renderLessonStep(){
+  const l=S.activeLesson, step=S.lessonStep
+  const total=l.sections.length
+  const section=l.sections[step]
+  const lv=document.getElementById('learn-lesson-view')
+  const prog=Math.round(((step+1)/total)*100)
+  let secHTML=''
+  if(step===0){
+    secHTML+=`<div class="lv-intro"><div class="lv-intro-title">${l.title}</div><div class="lv-intro-text">${l.intro}</div></div>`
+  }
+  if(section.type==='text'){
+    secHTML+=`<div class="info-block"><div class="info-head">${section.h}</div><div class="info-text">${section.b}</div></div>`
+  }
+  if(section.type==='beat-grid'){
+    const cells=[1,2,3,4,5,6,7,8].map(n=>{
+      const sp=section.special?.includes(n)
+      const on=section.highlighted?.includes(n)
+      return `<div class="bc ${sp?'special':on?'on':'off'}">${n}</div>`
+    }).join('')
+    secHTML+=`<div class="info-block"><div class="beat-grid">${cells}</div><div class="grid-label">${section.label}</div></div>`
+  }
+  if(section.type==='clave'){
+    const b1=section.b1.map((v,i)=>`<div class="bc ${v?'special':'off'}">${v?'●':'·'}</div>`).join('')
+    const b2=section.b2.map((v,i)=>`<div class="bc ${v?'on':'off'}">${v?'●':'·'}</div>`).join('')
+    secHTML+=`<div class="info-block"><div style="font-size:12px;color:var(--muted);margin-bottom:8px">Bar 1</div><div class="beat-grid">${b1}</div><div style="font-size:12px;color:var(--muted);margin:12px 0 8px">Bar 2</div><div class="beat-grid">${b2}</div><div class="grid-label">${section.label}</div></div>`
+  }
+  lv.innerHTML=`
+    <div class="lv-hdr">
+      <button class="back-btn" onclick="backLesson()">‹</button>
+      <div class="lv-title">${l.title}</div>
+      <div class="lv-step">${step+1} / ${total}</div>
+    </div>
+    <div class="lv-prog"><div class="lv-prog-fill" style="width:${prog}%"></div></div>
+    <div class="lv-body">${secHTML}</div>
+    <div class="lv-nav">
+      ${step>0?`<button class="big-btn secondary" style="flex:1;margin-top:0;padding:14px" onclick="lessonBack()">← Back</button>`:''}
+      <button class="big-btn" style="flex:2;margin-top:0;padding:14px" onclick="lessonNext()">
+        ${step<total-1?'Next →':'Complete ✓'}
+      </button>
+    </div>`
+}
+function backLesson(){
+  S.activeLesson=null
+  document.getElementById('learn-lesson-view').style.display='none'
+  document.getElementById('learn-list-view').style.display='block'
+  renderLearnList()
+}
+function lessonBack(){ S.lessonStep--; renderLessonStep() }
+function lessonNext(){
+  const l=S.activeLesson, total=l.sections.length
+  if(S.lessonStep<total-1){ S.lessonStep++; renderLessonStep() }
+  else {
+    S.completedLessons.add(l.id); saveLessons()
+    backLesson()
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// PROGRESS
+// ═══════════════════════════════════════════════════════════
+function computeStats(){
+  const sessions=S.sessions
+  const empty={accuracy:0,sessions:0,trend:'none'}
+  const byTempo={slow:{...empty},medium:{...empty},fast:{...empty}}
+  if(!sessions.length) return {byTempo,streak:0,total:0,overallAcc:0,avgErr:0,insights:[],recent:[]}
+  for(const t of ['slow','medium','fast']){
+    const arr=sessions.filter(s=>s.tempo===t)
+    if(!arr.length) continue
+    const acc=Math.round(arr.reduce((s,x)=>s+(x.accuracy??0),0)/arr.length)
+    const recent=arr.slice(-3).map(s=>s.accuracy??0)
+    const prev=arr.slice(-6,-3).map(s=>s.accuracy??0)
+    const rav=avg(recent), pav=avg(prev)
+    const trend=prev.length===0?'none':rav-pav>5?'improving':rav-pav<-5?'declining':'stable'
+    byTempo[t]={accuracy:acc,sessions:arr.length,trend}
+  }
+  const streak=computeStreak(sessions)
+  const overallAcc=Math.round(avg(sessions.map(s=>s.accuracy??0)))
+  const errs=sessions.filter(s=>s.avgErr!=null).map(s=>s.avgErr)
+  const avgErr=errs.length?Math.round(avg(errs)):0
+  const insights=generateInsights(byTempo,sessions)
+  const recent=[...sessions].sort((a,b)=>b.startedAt-a.startedAt).slice(0,10)
+  return{byTempo,streak,total:sessions.length,overallAcc,avgErr,insights,recent}
+}
+function avg(arr){ return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0 }
+function computeStreak(sessions){
+  const today=new Date(); today.setHours(0,0,0,0)
+  const days=new Set(sessions.map(s=>{const d=new Date(s.startedAt);d.setHours(0,0,0,0);return d.getTime()}))
+  let streak=0, check=today.getTime()
+  while(days.has(check)){ streak++; check-=86400000 }
+  if(streak===0&&days.has(today.getTime()-86400000)){
+    check=today.getTime()-86400000
+    while(days.has(check)){ streak++; check-=86400000 }
+  }
+  return streak
+}
+function generateInsights(bt,sessions){
+  const insights=[]
+  if(bt.slow.accuracy>=70&&bt.medium.accuracy<50&&bt.medium.sessions>0)
+    insights.push('You\'re accurate at slow tempo but drift at medium. Focus on relaxing your anticipation — the beat is coming to you.')
+  const catchSess=sessions.filter(s=>s.type==='catch-one')
+  const guidedSess=sessions.filter(s=>s.type==='guided')
+  const ca=avg(catchSess.map(s=>s.accuracy??0)), ga=avg(guidedSess.map(s=>s.accuracy??0))
+  if(ga-ca>20&&catchSess.length>2) insights.push('You hear the pulse well but miss phrase starts. Do more Catch the 1 drills — listen for the bass landing between beats 7 and 1.')
+  if(bt.slow.trend==='improving') insights.push('Your slow tempo accuracy is trending up. You\'re ready for more medium-tempo work.')
+  if(ca<50&&ga>65&&catchSess.length>3) insights.push('You find the beat but confuse count 5 with count 1. Listen for the bass hitting heavier on 1. The "5" feels like continuation; the "1" feels like arrival.')
+  if(!insights.length) insights.push('Keep training consistently. Timing accuracy builds slowly — even 2% per week is excellent progress.')
+  return insights
+}
+
+function buildSessionRecord(taps, tempo, type, start){
+  if(!taps||taps.length===0) return null
+  const scored=type==='catch-one'?taps.filter(t=>t.isOne!==false):taps
+  if(!scored.length) return null
+  const accuracy=Math.round(scored.reduce((s,t)=>s+(t.score??0),0)/scored.length)
+  const errs=scored.filter(t=>t.absErrMs!=null).map(t=>t.absErrMs)
+  const avgErr=errs.length?Math.round(avg(errs)):null
+  const dirs=scored.map(t=>t.direction).filter(Boolean)
+  const dir=dirs.length?Object.entries(dirs.reduce((a,v)=>{a[v]=(a[v]??0)+1;return a},{})).sort((a,b)=>b[1]-a[1])[0][0]:null
+  return{tempo,type,accuracy,avgErr,direction:dir,tapCount:taps.length,startedAt:start??Date.now()}
+}
+
+function renderProgress(){
+  const stats=computeStats()
+  document.getElementById('prog-sub').textContent=(stats.streak>0?stats.streak+'-day streak · ':'')+stats.total+' sessions total'
+  const body=document.getElementById('progress-body')
+  if(stats.total===0){
+    body.innerHTML=`<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">No sessions yet</div><div class="empty-text">Complete your first practice session to see progress here.</div></div>`
+    return
+  }
+  const sumHTML=`<div class="summary-grid">
+    <div class="sum-card"><div class="sum-val">${stats.overallAcc}%</div><div class="sum-lbl">Overall</div></div>
+    <div class="sum-card"><div class="sum-val">${stats.total}</div><div class="sum-lbl">Sessions</div></div>
+    <div class="sum-card"><div class="sum-val">${stats.avgErr>0?stats.avgErr+'ms':'—'}</div><div class="sum-lbl">Avg error</div></div>
+  </div>`
+  const ringColors={slow:'#4CAF7D',medium:'#E8A827',fast:'#E05252'}
+  const ringsHTML=`<div class="slabel">By tempo</div><div class="rings-row">
+    ${['slow','medium','fast'].map(id=>{
+      const t=stats.byTempo[id], c=ringColors[id]
+      const circ=144, off=circ-(t.accuracy/100)*circ
+      const trendEl=t.trend==='improving'?`<div class="trend trend-up">↑ improving</div>`:t.trend==='declining'?`<div class="trend trend-dn">↓ declining</div>`:t.sessions>0?`<div class="trend trend-st">→ stable</div>`:''
+      return `<div class="ring-card">
+        <div class="ring-wrap" style="margin-bottom:6px">
+          <svg width="56" height="56" viewBox="0 0 56 56" style="transform:rotate(-90deg)"><circle cx="28" cy="28" r="23" fill="none" stroke="var(--surf2)" stroke-width="5"/><circle cx="28" cy="28" r="23" fill="none" stroke="${c}" stroke-width="5" stroke-linecap="round" stroke-dasharray="144" stroke-dashoffset="${off}"/></svg>
+          <div class="ring-lbl">${t.accuracy}%</div>
+        </div>
+        <div class="ring-name">${id.charAt(0).toUpperCase()+id.slice(1)}</div>
+        ${trendEl}
+        <div class="sessions-ct">${t.sessions} sessions</div>
+      </div>`
+    }).join('')}
+  </div>`
+  const insHTML=`<div class="slabel">Coach insight</div>`+stats.insights.slice(0,2).map(i=>`<div class="insight-card"><div class="insight-text">${i}</div></div>`).join('')
+  const tempoNames={slow:'Slow',medium:'Medium',fast:'Fast'}
+  const histHTML=`<div class="slabel">Recent sessions</div><div class="hist-list">
+    ${stats.recent.map(s=>{
+      const acc=s.accuracy??0
+      const color=acc>=70?'var(--ok)':acc>=45?'var(--warn)':'var(--err)'
+      const d=new Date(s.startedAt).toLocaleDateString('en-US',{month:'short',day:'numeric'})
+      const type=s.type==='catch-one'?'Catch the 1':'Guided Practice'
+      return `<div class="hist-row">
+        <div class="hist-dot" style="background:${color}"></div>
+        <div style="flex:1"><div class="hist-mode">${type} · ${tempoNames[s.tempo]??s.tempo}</div><div class="hist-meta">${d} · ${s.tapCount??0} taps${s.avgErr?' · '+s.avgErr+'ms avg':''}</div></div>
+        <div class="hist-acc" style="color:${color}">${acc}%</div>
+      </div>`
+    }).join('')}
+  </div>`
+  body.innerHTML=sumHTML+ringsHTML+insHTML+histHTML
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+initPips('pips')
+initPips('catch-pips')
+renderHome()
+renderLearnList()
+// Warm up audio on first tap anywhere
+document.addEventListener('pointerdown',()=>{ engine.init().catch(()=>{}) }, {once:true})
+</script>
+</body>
+</html>
