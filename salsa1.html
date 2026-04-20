@@ -6,1278 +6,981 @@
 <meta name="theme-color" content="#C8372D"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="Salsa1"/>
 <title>Salsa1 – Beat Training</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --red:#C8372D;--red-dark:#9B271E;
-  --gold:#D4A017;--gold-light:#F5CC5A;
-  --bg:#0F0C0C;--surf:#1A1614;--surf2:#231D1D;--surf3:#2E2626;
-  --text:#F0ECE8;--muted:#8A7F7A;--faint:#443D3D;
-  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
-  --ok:#4CAF7D;--warn:#E8A827;--err:#E05252;
+  --red:#C8372D;--red2:#7A1A14;--gold:#D4A017;--gold2:#F5CC5A;
+  --bg:#080606;--s1:#130F0F;--s2:#1C1616;--s3:#262020;
+  --tx:#F0ECE8;--mu:#8A7F7A;--fa:#3E3636;
+  --ok:#4CAF7D;--wa:#E8A827;--er:#E05252;--inf:#5B9BD5;
   --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
-  --safe-top:env(safe-area-inset-top,0px);
-  --safe-bot:env(safe-area-inset-bottom,0px);
+  --sb:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-top,0px);
 }
-html{background:var(--bg);height:100%;overscroll-behavior:none}
-body{
-  font-family:var(--fb);background:var(--bg);color:var(--text);
-  min-height:100dvh;-webkit-text-size-adjust:100%;
-  -webkit-font-smoothing:antialiased;touch-action:manipulation;
-  user-select:none;-webkit-user-select:none;overscroll-behavior-y:contain;
-}
-button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-a,-webkit-tap-highlight-color:transparent}
-input{font-family:inherit}
-::-webkit-scrollbar{width:2px}
-::-webkit-scrollbar-thumb{background:var(--surf3);border-radius:2px}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-family:var(--fb);
+  -webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased;
+  touch-action:manipulation;user-select:none;-webkit-user-select:none;overscroll-behavior:none;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+#shell{max-width:480px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;background:var(--bg);}
+#screens{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(70px + var(--sb));}
+.scr{display:none}.scr.on{display:block}
 
-#shell{
-  display:flex;flex-direction:column;min-height:100dvh;
-  max-width:480px;margin:0 auto;position:relative;background:var(--bg);
-}
-#main{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(64px + var(--safe-bot))}
-
-/* SCREENS */
-.screen{display:none;flex-direction:column;min-height:100%}
-.screen.on{display:flex}
+/* UNLOCK BANNER */
+#ub{position:fixed;top:0;left:0;right:0;z-index:9999;background:var(--red);color:#fff;
+  text-align:center;padding:calc(10px + var(--st)) 16px 10px;
+  font-family:var(--fd);font-size:13px;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:opacity .3s;}
 
 /* BOTTOM NAV */
-#nav{
-  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
-  width:100%;max-width:480px;
-  background:rgba(15,12,12,0.94);backdrop-filter:blur(20px);
-  border-top:.5px solid var(--border);
-  display:flex;padding-bottom:var(--safe-bot);z-index:100;
-}
-.nav-btn{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:10px 4px 8px;gap:3px;color:var(--faint);background:none;border:none;
-  font-size:10px;font-weight:500;letter-spacing:.03em;transition:color .15s;
-}
-.nav-btn.act{color:var(--red)}
-.nav-icon{font-size:18px;line-height:1}
+#nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;
+  background:rgba(8,6,6,0.96);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-top:1px solid rgba(255,255,255,0.06);display:flex;padding-bottom:var(--sb);z-index:500;}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:10px 2px 8px;gap:3px;font-size:10px;font-weight:500;color:var(--fa);letter-spacing:.03em;transition:color .15s;}
+.nb.on{color:var(--red)}.nbi{font-size:18px;line-height:1}
 
-/* SECTION LABEL */
-.slabel{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:0 20px;margin-bottom:10px}
+@keyframes rip{to{transform:translate(-50%,-50%) scale(26);opacity:0}}
+.rip{position:absolute;border-radius:50%;width:10px;height:10px;background:rgba(200,55,45,.4);
+  left:50%;top:50%;pointer-events:none;animation:rip .55s ease-out forwards}
 
-/* CARDS */
-.card{background:var(--surf);border:.5px solid var(--border);border-radius:16px;padding:16px}
+/* ══════════ TRACK SELECTOR ══════════ */
+#s-tracks{}
+.tracks-hdr{padding:18px 18px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
+.tracks-title{font-family:var(--fd);font-size:20px;font-weight:800;margin-bottom:3px}
+.tracks-sub{font-size:12px;color:var(--mu)}
+.tempo-filter{display:flex;gap:5px;padding:12px 18px 6px}
+.tf-btn{flex:1;padding:7px 4px;border-radius:9px;border:1.5px solid rgba(255,255,255,.07);
+  background:var(--s2);font-size:11px;font-weight:500;text-align:center;cursor:pointer;transition:all .13s}
+.tf-btn.sel{border-color:var(--red);background:rgba(200,55,45,.12);color:var(--red)}
+.track-list{padding:0 18px 20px}
+.track-card{display:flex;align-items:center;gap:14px;padding:14px 0;
+  border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;transition:opacity .15s}
+.track-card.locked{opacity:.4;cursor:default}
+.track-thumb{width:54px;height:54px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:26px;position:relative;overflow:hidden;}
+.track-lock{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;font-size:16px}
+.track-info{flex:1;min-width:0}
+.track-name{font-family:var(--fd);font-size:14px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track-artist{font-size:11px;color:var(--mu);margin-bottom:4px}
+.track-tags{display:flex;gap:4px;flex-wrap:wrap}
+.tag{font-size:9px;padding:2px 7px;border-radius:999px;font-weight:500}
+.tag-slow{background:rgba(76,175,125,.15);color:var(--ok)}
+.tag-medium{background:rgba(232,168,39,.15);color:var(--wa)}
+.tag-fast{background:rgba(224,82,82,.15);color:var(--er)}
+.tag-info{background:rgba(91,155,213,.12);color:var(--inf)}
+.track-bpm{font-family:var(--fd);font-size:12px;font-weight:700;color:var(--mu);flex-shrink:0}
 
-/* ── HOME ─────────────────────────────── */
-#s-home{}
-.home-hdr{padding:20px 20px 16px;border-bottom:.5px solid var(--border)}
-.logo{font-family:var(--fd);font-size:24px;font-weight:800;letter-spacing:-.5px;color:var(--red)}
-.logo span{color:var(--gold)}
-.home-sub{font-size:13px;color:var(--muted);margin-top:2px}
-.streak-badge{
-  background:rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.3);
-  border-radius:12px;padding:8px 14px;text-align:center;
-}
-.streak-num{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--gold)}
-.streak-lbl{font-size:10px;color:var(--muted)}
+/* ══════════ PLAYER SCREEN ══════════ */
+#s-player{}
+.player-hdr{padding:14px 18px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
+.back-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.back-btn{width:32px;height:32px;border-radius:9px;background:var(--s2);
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.now-title{font-family:var(--fd);font-size:14px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.now-bpm{font-size:11px;color:var(--mu);margin-left:auto;flex-shrink:0}
 
-.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px 20px}
-.stat-card{background:var(--surf);border:.5px solid var(--border);border-radius:16px;padding:14px 8px;text-align:center}
+/* YOUTUBE EMBED */
+.yt-wrap{position:relative;width:100%;padding:12px 18px;background:var(--s1);border-bottom:1px solid rgba(255,255,255,.06)}
+.yt-frame{width:100%;height:180px;border-radius:14px;border:none;background:#000;overflow:hidden}
+.yt-overlay{position:absolute;inset:12px 18px;border-radius:14px;background:transparent;cursor:pointer;display:none}
+.yt-controls{display:flex;align-items:center;gap:10px;margin-top:10px}
+.yt-time{font-family:var(--fd);font-size:12px;color:var(--mu);min-width:60px}
+.yt-prog-track{flex:1;height:4px;background:var(--s2);border-radius:2px;overflow:hidden;cursor:pointer}
+.yt-prog-fill{height:100%;background:var(--red);border-radius:2px;transition:width .5s linear}
 
-.ring-wrap{position:relative;width:56px;height:56px;margin:0 auto 6px}
-.ring-wrap svg{transform:rotate(-90deg)}
-.ring-lbl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:13px;font-weight:700}
-.ring-name{font-size:11px;color:var(--muted)}
+/* MODE TABS */
+.mode-tabs{display:flex;gap:4px;padding:10px 18px 6px}
+.mtab{flex:1;padding:7px 2px;border-radius:9px;border:1px solid rgba(255,255,255,.07);
+  background:var(--s2);color:var(--mu);font-size:9px;font-weight:500;text-align:center;cursor:pointer;transition:all .13s;line-height:1.35}
+.mtab .mn{font-family:var(--fd);font-size:11px;font-weight:700;display:block;margin-bottom:1px}
+.mtab.sel{border-color:rgba(200,55,45,.5);background:rgba(200,55,45,.12);color:var(--red)}
 
-.daily-card{
-  margin:0 20px 20px;
-  background:linear-gradient(135deg,#1E0F0E 0%,var(--surf) 100%);
-  border:.5px solid rgba(200,55,45,.3);border-radius:20px;padding:18px;cursor:pointer;
-}
-.daily-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
-.daily-tag{font-size:10px;color:var(--red);font-weight:500;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
-.daily-title{font-family:var(--fd);font-size:18px;font-weight:700}
-.daily-dur{background:rgba(200,55,45,.12);color:var(--red);font-size:12px;font-weight:500;padding:6px 12px;border-radius:8px}
-.daily-steps{display:flex;gap:8px}
-.daily-step{flex:1;background:rgba(255,255,255,.04);border-radius:8px;padding:8px 4px;text-align:center;font-size:10px;color:var(--muted);line-height:1.5}
-.daily-step-icon{font-size:15px;display:block;margin-bottom:3px}
+/* BEAT TIMELINE */
+.timeline{padding:6px 18px 4px}
+.beat-cells{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}
+.bc-wrap{display:flex;flex-direction:column;align-items:center;gap:2px}
+.bc-bar{width:100%;height:7px;border-radius:4px;background:var(--s2);transition:all .07s}
+.bc-bar.lit-one{background:var(--red);height:14px;box-shadow:0 0 8px rgba(200,55,45,.5)}
+.bc-bar.lit-other{background:var(--gold);height:10px}
+.bc-num{font-size:9px;font-family:var(--fd);font-weight:700;color:var(--fa)}
+.bc-num.show{color:var(--mu)}.bc-num.show-one{color:var(--red)}
 
-.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px;margin-bottom:20px}
-.mode-card{
-  text-align:left;background:var(--surf);border:.5px solid var(--border);
-  border-radius:16px;padding:16px 14px;cursor:pointer;position:relative;
-  transition:border-color .15s;
-}
-.mode-icon-wrap{width:36px;height:36px;border-radius:10px;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px}
-.mode-name{font-family:var(--fd);font-size:14px;font-weight:700;margin-bottom:4px}
-.mode-desc{font-size:11px;color:var(--muted);line-height:1.4}
-.mode-badge{position:absolute;top:10px;right:10px;font-size:9px;font-weight:600;padding:3px 7px;border-radius:5px;background:rgba(200,55,45,.18);color:var(--red);letter-spacing:.05em}
+/* COUNT */
+.count-area{text-align:center;padding:4px 18px 6px}
+.count-big{font-family:var(--fd);font-size:80px;font-weight:800;line-height:1;letter-spacing:-5px;transition:color .06s,transform .05s}
+.count-big.f1{color:var(--red);transform:scale(1.1)}
+.count-big.fb{color:var(--tx);transform:scale(1.04)}
+.count-small{font-size:12px;color:var(--mu);margin-top:2px;min-height:16px}
 
-/* ── PRACTICE ─────────────────────────── */
-#s-practice{}
-.prac-hdr{padding:16px 20px 12px;border-bottom:.5px solid var(--border);flex-shrink:0}
-.prac-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.level-pill{font-size:11px;font-weight:500;padding:4px 10px;border-radius:999px;background:rgba(200,55,45,.12);color:var(--red);letter-spacing:.06em}
-.acc-num{font-family:var(--fd);font-size:18px;font-weight:700;color:var(--gold)}
-
-.tempo-row{display:flex;gap:6px;background:var(--surf2);padding:5px;border-radius:12px}
-.tempo-btn{flex:1;padding:8px 4px;border-radius:8px;border:1.5px solid transparent;background:transparent;font-size:12px;font-weight:500;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
-.tempo-btn.sel{border-color:currentColor}
-.tempo-bpm{font-size:10px;opacity:.7}
-
-.count-area{padding:20px 20px 12px;text-align:center;flex-shrink:0}
-.count-big{font-family:var(--fd);font-size:88px;font-weight:800;line-height:1;letter-spacing:-3px;transition:color .08s}
-.count-sub{font-size:13px;color:var(--muted);margin-top:6px}
-
-.pips{display:flex;gap:6px;padding:0 20px;margin-bottom:12px}
-.pip{flex:1;height:7px;border-radius:4px;background:var(--surf2);transition:all .08s ease}
-.pip.one{background:rgba(200,55,45,.3)}
-.pip.cur{height:11px;transform:scaleY(1)}
-.pip.cur.one{background:var(--red)}
-.pip.cur.other{background:var(--gold)}
-
-.phrase-area{padding:0 20px;margin-bottom:16px}
-.phrase-top{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px}
-.phrase-track{height:4px;background:var(--surf2);border-radius:2px;overflow:hidden}
-.phrase-fill{height:100%;background:var(--red);border-radius:2px;transition:width .06s linear,background .12s}
-
-.tap-zone{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 20px 16px;gap:18px}
-
-@keyframes ripple{to{transform:translate(-50%,-50%) scale(22);opacity:0}}
-.tap-btn{
-  width:170px;height:170px;border-radius:50%;
-  background:var(--surf);border:2px solid var(--border2);
+/* TAP */
+.tap-zone{display:flex;flex-direction:column;align-items:center;padding:6px 18px 8px;gap:10px}
+.tap-btn{width:155px;height:155px;border-radius:50%;
+  background:var(--s1);border:2px solid rgba(255,255,255,.1);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
-  position:relative;overflow:hidden;transition:border-color .15s,transform .06s,background .1s;
-}
-.tap-btn.playing{border-color:rgba(200,55,45,.4);cursor:pointer}
-.tap-btn.playing:active{transform:scale(.91)}
-.tap-btn-icon{font-size:28px;pointer-events:none}
-.tap-btn-label{font-family:var(--fd);font-size:13px;font-weight:700;letter-spacing:.07em;pointer-events:none}
-.tap-btn-sub{font-size:11px;color:var(--muted);pointer-events:none}
-.ripple-el{position:absolute;border-radius:50%;width:12px;height:12px;background:rgba(200,55,45,.35);left:50%;top:50%;pointer-events:none;animation:ripple .5s ease-out forwards}
+  position:relative;overflow:hidden;transition:border-color .12s,transform .06s,background .08s;}
+.tap-btn.ready{border-color:rgba(200,55,45,.5);cursor:pointer}
+.tap-btn.ready:active{transform:scale(.89)}
+.tap-btn-icon{font-size:26px;pointer-events:none}
+.tap-btn-label{font-family:var(--fd);font-size:10px;font-weight:700;letter-spacing:.07em;pointer-events:none}
+.tap-btn-sub{font-size:9px;color:var(--mu);pointer-events:none}
 
-.fb-pill{
-  padding:9px 22px;border-radius:999px;font-size:14px;font-weight:500;
-  text-align:center;min-width:200px;border:1px solid transparent;transition:all .12s;
-}
-.fb-neutral{background:var(--surf2);color:var(--muted);border-color:var(--border)}
-.fb-perfect{background:rgba(76,175,125,.15);color:var(--ok);border-color:rgba(76,175,125,.35)}
-.fb-good{background:rgba(232,168,39,.15);color:var(--warn);border-color:rgba(232,168,39,.35)}
-.fb-off{background:rgba(232,168,39,.1);color:var(--warn);border-color:rgba(232,168,39,.25)}
-.fb-miss{background:rgba(224,82,82,.15);color:var(--err);border-color:rgba(224,82,82,.35)}
+/* FB */
+.fb-pill{padding:7px 16px;border-radius:999px;font-size:13px;font-weight:500;
+  text-align:center;min-width:180px;border:1px solid transparent;transition:all .09s}
+.fb-n{background:var(--s2);color:var(--mu);border-color:rgba(255,255,255,.07)}
+.fb-p{background:rgba(76,175,125,.14);color:var(--ok);border-color:rgba(76,175,125,.3)}
+.fb-g{background:rgba(232,168,39,.14);color:var(--wa);border-color:rgba(232,168,39,.3)}
+.fb-o{background:rgba(232,168,39,.09);color:var(--wa);border-color:rgba(232,168,39,.2)}
+.fb-m{background:rgba(224,82,82,.14);color:var(--er);border-color:rgba(224,82,82,.3)}
 
-.running-stats{font-size:12px;color:var(--muted);display:flex;gap:14px}
+.run-stats{font-size:10px;color:var(--mu);display:flex;gap:10px}
 
-.ctrl-row{display:flex;gap:8px;padding:12px 20px;border-top:.5px solid var(--border);flex-shrink:0}
-.ctrl{flex:1;padding:12px 6px;border-radius:12px;border:1.5px solid var(--border);background:var(--surf2);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:18px;transition:all .15s}
-.ctrl span.cl{font-size:10px;font-family:var(--fb)}
-.ctrl.gold-on{border-color:rgba(212,160,23,.6);background:rgba(212,160,23,.1);color:var(--gold)}
-.ctrl.red-on{border-color:rgba(200,55,45,.6);background:rgba(200,55,45,.1);color:var(--red)}
-.play-ctrl{flex:2;padding:12px;border-radius:12px;border:none;background:var(--red);color:#fff;font-family:var(--fd);font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.03em;transition:background .15s}
-.play-ctrl.running{background:var(--red-dark)}
-
-.diff-row{display:flex;gap:6px;padding:0 20px 8px}
-.diff-btn{flex:1;padding:6px 2px;border-radius:8px;border:1px solid var(--border);background:transparent;font-size:11px;font-weight:500;color:var(--faint);transition:all .15s}
-.diff-btn.sel{border-color:rgba(200,55,45,.5);background:rgba(200,55,45,.1);color:var(--red)}
-
-/* ── CATCH THE 1 ──────────────────────── */
-.catch-hdr{padding:20px;border-bottom:.5px solid var(--border)}
-.catch-title{font-family:var(--fd);font-size:22px;font-weight:800;margin-bottom:4px}
-.catch-sub{font-size:13px;color:var(--muted)}
-
-.setup-body{flex:1;padding:20px;display:flex;flex-direction:column;gap:20px}
-.setup-label{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px}
-
-.diff-grid{display:flex;gap:8px}
-.diff-card{flex:1;padding:12px 4px;border-radius:12px;border:1.5px solid var(--border);background:var(--surf2);color:var(--muted);font-size:11px;font-weight:500;text-align:center;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:4px}
-.diff-card.sel{border-color:rgba(200,55,45,.5);background:rgba(200,55,45,.1);color:var(--red)}
-.diff-d{font-family:var(--fd);font-size:14px;font-weight:700}
-.diff-sub{font-size:9px;color:inherit;opacity:.7;line-height:1.3;text-align:center}
-
-.tempo-pick{display:flex;gap:8px}
-.tp-btn{flex:1;padding:10px 4px;border-radius:12px;border:1.5px solid var(--border);background:var(--surf2);font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:all .15s}
-.tp-bpm{font-size:10px}
-
-.score-card{background:var(--surf);border:.5px solid var(--border);border-radius:16px;padding:16px}
-.score-row{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}
-.score-tag{color:var(--muted)}
-
-.big-btn{
-  width:100%;padding:18px;border-radius:16px;border:none;
+/* CTRLS */
+.ctrl-row{display:flex;gap:7px;padding:8px 18px;border-top:1px solid rgba(255,255,255,.06)}
+.ctrl-sm{flex:1;padding:9px 4px;border-radius:11px;border:1.5px solid rgba(255,255,255,.08);
+  background:var(--s2);display:flex;flex-direction:column;align-items:center;gap:2px;font-size:16px}
+.ctrl-sm .cl{font-size:9px;color:var(--mu)}
+.ctrl-sm.gold{border-color:rgba(212,160,23,.6);background:rgba(212,160,23,.1);color:var(--gold)}
+.ctrl-sm.red{border-color:rgba(200,55,45,.6);background:rgba(200,55,45,.1);color:var(--red)}
+.play-ctrl{flex:2;padding:11px;border-radius:11px;border:none;
   background:var(--red);color:#fff;font-family:var(--fd);
-  font-size:17px;font-weight:700;letter-spacing:.02em;margin-top:auto;
-  transition:background .15s,transform .08s;
-}
-.big-btn:active{transform:scale(.97);background:var(--red-dark)}
-.big-btn.secondary{background:var(--surf2);border:1.5px solid var(--border2);color:var(--text);font-size:14px}
+  font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .12s}
+.play-ctrl.stop{background:var(--red2)}
 
-.play-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:0 20px}
-.catch-tap-btn{
-  width:190px;height:190px;border-radius:50%;cursor:pointer;
-  background:var(--surf);border:2.5px solid var(--border2);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
-  transition:border-color .06s,background .06s,transform .06s;position:relative;overflow:hidden;
-}
-.catch-tap-btn.one-lit{border-color:var(--red);background:rgba(200,55,45,.18)}
-.catch-tap-btn:active{transform:scale(.91)}
-.catch-tap-icon{font-size:36px;pointer-events:none}
-.catch-tap-label{font-family:var(--fd);font-size:14px;font-weight:700;letter-spacing:.05em;pointer-events:none}
-.catch-tap-hint{font-size:11px;color:var(--muted);pointer-events:none}
-.tally{font-size:12px;color:var(--muted);text-align:center}
+/* SUMMARY */
+#summary{display:none;position:fixed;inset:0;z-index:800;background:rgba(8,6,6,.96);
+  padding:20px;overflow-y:auto;flex-direction:column;align-items:center;gap:14px;
+  padding-top:calc(20px + var(--st));}
+#summary.on{display:flex}
+.sum-ttl{font-family:var(--fd);font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.1em;text-transform:uppercase}
+.sum-score{font-family:var(--fd);font-size:72px;font-weight:800;line-height:1}
+.sum-grade{font-size:15px;font-weight:500;margin-top:3px}
+.sum-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;width:100%}
+.sum-card{background:var(--s1);border:1px solid rgba(255,255,255,.07);border-radius:13px;padding:11px 7px;text-align:center}
+.sum-val{font-family:var(--fd);font-size:17px;font-weight:800;color:var(--gold);margin-bottom:2px}
+.sum-lbl{font-size:9px;color:var(--mu)}
+.sum-insight{width:100%;background:var(--s1);border:1px solid rgba(255,255,255,.07);border-radius:13px;padding:13px 15px;font-size:13px;line-height:1.6}
+.sum-insight strong{color:var(--gold);font-weight:500}
+.tb-wrap{width:100%;background:var(--s1);border-radius:13px;overflow:hidden}
+.tb-hdr{padding:9px 13px;border-bottom:1px solid rgba(255,255,255,.06);font-size:9px;color:var(--mu);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.tb-row{display:flex;justify-content:space-between;align-items:center;padding:7px 13px;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px}
+.sum-btns{display:flex;gap:8px;width:100%;padding-bottom:6px}
+.sbtn{flex:1;padding:13px;border-radius:12px;font-family:var(--fd);font-size:13px;font-weight:700;border:none;cursor:pointer}
+.sbtn.pr{background:var(--red);color:#fff}.sbtn.se{background:var(--s2);border:1.5px solid rgba(255,255,255,.12);color:var(--tx)}
 
-.result-body{flex:1;padding:24px 20px;display:flex;flex-direction:column;align-items:center;gap:20px}
-.result-score{font-family:var(--fd);font-size:72px;font-weight:800;line-height:1}
-.result-sub{font-size:14px;color:var(--muted);margin-top:4px;text-align:center}
-.tap-list{width:100%;background:var(--surf);border-radius:16px;overflow:hidden}
-.tap-list-hdr{padding:12px 16px;border-bottom:.5px solid var(--border);font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
-.tap-list-item{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:.5px solid var(--border);font-size:13px}
-.result-btns{display:flex;gap:10px;width:100%}
-
-/* ── LEARN ────────────────────────────── */
-.learn-hdr{padding:20px;border-bottom:.5px solid var(--border)}
-.learn-title{font-family:var(--fd);font-size:22px;font-weight:800;margin-bottom:4px}
-.lesson-list{padding:0 20px}
-.lesson-row{display:flex;align-items:center;gap:14px;padding:16px 0;border-bottom:.5px solid var(--border);cursor:pointer;background:none;border-left:none;border-right:none;border-top:none;width:100%;text-align:left}
-.lesson-row.locked{opacity:.4;cursor:default}
-.lesson-num{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:14px;font-weight:700}
-.ln-done{background:rgba(76,175,125,.15);color:var(--ok)}
-.ln-active{background:rgba(200,55,45,.12);color:var(--red)}
-.ln-locked{background:var(--surf2);color:var(--faint)}
-.lesson-name{font-size:15px;font-weight:500;margin-bottom:2px}
-.lesson-meta{font-size:12px;color:var(--muted)}
-.lesson-arrow{color:var(--faint);font-size:18px;margin-left:auto}
-
-/* LESSON VIEW */
-.lv-hdr{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:.5px solid var(--border);flex-shrink:0}
-.back-btn{width:36px;height:36px;border-radius:10px;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:none;color:var(--text);cursor:pointer}
-.lv-title{font-family:var(--fd);font-size:15px;font-weight:700;flex:1}
-.lv-step{font-size:12px;color:var(--muted)}
-.lv-prog{height:3px;background:var(--surf2)}
-.lv-prog-fill{height:100%;background:var(--red);transition:width .3s}
-.lv-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px}
-.lv-intro{background:var(--surf);border:.5px solid var(--border);border-radius:16px;padding:18px}
-.lv-intro-title{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--gold);margin-bottom:8px}
-.lv-intro-text{font-size:14px;line-height:1.65;opacity:.85}
-.info-block{background:var(--surf);border:.5px solid var(--border);border-radius:16px;padding:18px}
-.info-head{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--gold);margin-bottom:8px}
-.info-text{font-size:14px;line-height:1.65;opacity:.85}
-.beat-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin:4px 0}
-.bc{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:14px;font-weight:700;border:1.5px solid var(--border)}
-.bc.special{background:rgba(200,55,45,.25);border-color:var(--red);color:var(--red)}
-.bc.on{background:rgba(212,160,23,.15);border-color:rgba(212,160,23,.35);color:var(--gold)}
-.bc.off{background:var(--surf2);color:var(--faint)}
-.grid-label{font-size:11px;color:var(--muted);text-align:center;margin-top:4px}
-.lv-nav{padding:12px 20px;border-top:.5px solid var(--border);display:flex;gap:10px;flex-shrink:0}
-
-/* ── PROGRESS ─────────────────────────── */
-.prog-hdr{padding:20px;border-bottom:.5px solid var(--border)}
-.prog-title{font-family:var(--fd);font-size:22px;font-weight:800;margin-bottom:4px}
-.prog-sub{font-size:13px;color:var(--muted)}
-.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px 20px}
-.sum-card{background:var(--surf);border:.5px solid var(--border);border-radius:16px;padding:14px 10px;text-align:center}
-.sum-val{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--gold);margin-bottom:2px}
-.sum-lbl{font-size:10px;color:var(--muted)}
-.rings-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 20px 20px}
-.ring-card{background:var(--surf);border:.5px solid var(--border);border-radius:16px;padding:14px 8px;text-align:center}
-.trend{font-size:10px;margin-top:4px}
-.trend-up{color:var(--ok)}.trend-dn{color:var(--err)}.trend-st{color:var(--muted)}
-.sessions-ct{font-size:10px;color:var(--faint);margin-top:2px}
-.insight-card{background:var(--surf);border:.5px solid var(--border);border-radius:16px;padding:14px 16px;margin:0 20px 8px}
-.insight-lbl{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
-.insight-text{font-size:13px;line-height:1.55;opacity:.9}
-.hist-list{padding:0 20px 40px}
-.hist-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:.5px solid var(--border)}
-.hist-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.hist-mode{font-size:13px;font-weight:500}
-.hist-meta{font-size:11px;color:var(--muted);margin-top:1px}
-.hist-acc{font-family:var(--fd);font-size:16px;font-weight:700}
-.empty-state{padding:40px 20px;text-align:center}
-.empty-icon{font-size:40px;margin-bottom:16px}
-.empty-title{font-family:var(--fd);font-size:18px;font-weight:700;margin-bottom:8px}
-.empty-text{font-size:14px;color:var(--muted)}
+/* PROGRESS */
+.prog-hdr{padding:18px 18px 12px;border-bottom:1px solid rgba(255,255,255,.06)}
+.prog-title{font-family:var(--fd);font-size:20px;font-weight:800;margin-bottom:3px}
+.prog-sub{font-size:12px;color:var(--mu)}
+.unlock-card{margin:10px 18px;background:var(--s1);border:1px solid rgba(212,160,23,.2);border-radius:13px;padding:13px 15px}
+.pu-title{font-size:10px;color:var(--gold);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:7px}
+.pu-row{display:flex;gap:8px;align-items:center}
+.pu-track{flex:1;height:5px;background:var(--s2);border-radius:3px;overflow:hidden}
+.pu-fill{height:100%;background:var(--gold);border-radius:3px;transition:width .5s}
+.pu-lbl{font-size:10px;color:var(--mu);white-space:nowrap}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:10px 18px}
+.sg{background:var(--s1);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:11px 7px;text-align:center}
+.sg-v{font-family:var(--fd);font-size:18px;font-weight:800;color:var(--gold);margin-bottom:1px}
+.sg-l{font-size:9px;color:var(--mu)}
+.rings-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:0 18px 10px}
+.rc{background:var(--s1);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:11px 6px;text-align:center}
+.rw{position:relative;width:52px;height:52px;margin:0 auto 4px}
+.rw svg{transform:rotate(-90deg)}
+.rl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:12px;font-weight:700}
+.rn{font-size:10px;color:var(--mu)}.rct{font-size:9px;color:var(--fa);margin-top:1px}
+.ins-cards{padding:0 18px 10px}
+.ins{background:var(--s1);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 14px;margin-bottom:7px;font-size:12px;line-height:1.6}
+.hist-sec{padding:0 18px 40px}
+.slbl{font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:7px}
+.hr{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.hd{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.hm{font-size:12px;font-weight:500}.hmt{font-size:10px;color:var(--mu);margin-top:1px}
+.ha{font-family:var(--fd);font-size:14px;font-weight:700}
+.empty-state{padding:40px 20px;text-align:center;color:var(--mu);font-size:14px}
 </style>
 </head>
 <body>
+<div id="ub">🔊 Tap anywhere to enable audio</div>
 <div id="shell">
-  <div id="main">
+<div id="screens">
 
-    <!-- ═══ HOME ═══════════════════════════════════════════════ -->
-    <div class="screen on" id="s-home">
-      <div class="home-hdr">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div class="logo">salsa<span>1</span></div>
-            <div class="home-sub">Beat timing training</div>
-          </div>
-          <div class="streak-badge" id="streak-badge" style="display:none">
-            <div class="streak-num" id="streak-num">0</div>
-            <div class="streak-lbl">day streak</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="stats-row" id="home-rings">
-        <div class="stat-card"><div class="ring-wrap" id="ring-slow">
-          <svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="23" fill="none" stroke="var(--surf2)" stroke-width="5"/><circle id="rc-slow" cx="28" cy="28" r="23" fill="none" stroke="#4CAF7D" stroke-width="5" stroke-linecap="round" stroke-dasharray="144" stroke-dashoffset="144" style="transition:stroke-dashoffset .6s ease"/></svg>
-          <div class="ring-lbl" id="rl-slow">0%</div></div>
-          <div class="ring-name">Slow</div></div>
-        <div class="stat-card"><div class="ring-wrap">
-          <svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="23" fill="none" stroke="var(--surf2)" stroke-width="5"/><circle id="rc-medium" cx="28" cy="28" r="23" fill="none" stroke="#E8A827" stroke-width="5" stroke-linecap="round" stroke-dasharray="144" stroke-dashoffset="144" style="transition:stroke-dashoffset .6s ease"/></svg>
-          <div class="ring-lbl" id="rl-medium">0%</div></div>
-          <div class="ring-name">Medium</div></div>
-        <div class="stat-card"><div class="ring-wrap">
-          <svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="23" fill="none" stroke="var(--surf2)" stroke-width="5"/><circle id="rc-fast" cx="28" cy="28" r="23" fill="none" stroke="#E05252" stroke-width="5" stroke-linecap="round" stroke-dasharray="144" stroke-dashoffset="144" style="transition:stroke-dashoffset .6s ease"/></svg>
-          <div class="ring-lbl" id="rl-fast">0%</div></div>
-          <div class="ring-name">Fast</div></div>
-      </div>
-
-      <div class="slabel">Today's session</div>
-      <div class="daily-card" onclick="goTo('practice')">
-        <div class="daily-top">
-          <div><div class="daily-tag">Recommended</div><div class="daily-title" id="daily-title">10-Min Standard</div></div>
-          <div class="daily-dur" id="daily-dur">10 min</div>
-        </div>
-        <div class="daily-steps">
-          <div class="daily-step"><span class="daily-step-icon">♡</span>Pulse warmup</div>
-          <div class="daily-step"><span class="daily-step-icon">●</span>Count drill</div>
-          <div class="daily-step"><span class="daily-step-icon">◈</span>Catch the 1</div>
-          <div class="daily-step"><span class="daily-step-icon">▲</span>Score</div>
-        </div>
-      </div>
-
-      <div class="slabel">Training modes</div>
-      <div class="mode-grid">
-        <div class="mode-card" onclick="goTo('practice')">
-          <div class="mode-icon-wrap">🥁</div>
-          <div class="mode-name">Guided Practice</div>
-          <div class="mode-desc">Tap along with real-time feedback</div>
-          <div class="mode-badge">ACTIVE</div>
-        </div>
-        <div class="mode-card" onclick="goTo('catch')">
-          <div class="mode-icon-wrap">🎯</div>
-          <div class="mode-name">Catch the 1</div>
-          <div class="mode-desc">Find the downbeat by ear</div>
-        </div>
-        <div class="mode-card" onclick="goTo('learn')">
-          <div class="mode-icon-wrap">◎</div>
-          <div class="mode-name">Lessons</div>
-          <div class="mode-desc">Structured ear training</div>
-        </div>
-        <div class="mode-card" onclick="goTo('progress')">
-          <div class="mode-icon-wrap">▲</div>
-          <div class="mode-name">Progress</div>
-          <div class="mode-desc">Insights and session history</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ PRACTICE ════════════════════════════════════════════ -->
-    <div class="screen" id="s-practice">
-      <div class="prac-hdr">
-        <div class="prac-meta">
-          <span class="level-pill" id="prac-level-pill">LEVEL 1 · VISUAL AIDS</span>
-          <span class="acc-num" id="prac-acc">—</span>
-        </div>
-        <div class="tempo-row" id="prac-tempo-row">
-          <button class="tempo-btn sel" data-t="slow" style="color:#4CAF7D" onclick="selectTempo('slow',this)">
-            <span style="font-family:var(--fd);font-size:13px;font-weight:700">Slow</span>
-            <span class="tempo-bpm">78 BPM</span>
-          </button>
-          <button class="tempo-btn" data-t="medium" style="color:#E8A827" onclick="selectTempo('medium',this)">
-            <span style="font-family:var(--fd);font-size:13px;font-weight:700">Medium</span>
-            <span class="tempo-bpm">100 BPM</span>
-          </button>
-          <button class="tempo-btn" data-t="fast" style="color:#E05252" onclick="selectTempo('fast',this)">
-            <span style="font-family:var(--fd);font-size:13px;font-weight:700">Fast</span>
-            <span class="tempo-bpm">120 BPM</span>
-          </button>
-        </div>
-      </div>
-      <div class="count-area">
-        <div class="count-big" id="count-big" style="color:var(--text)">—</div>
-        <div class="count-sub" id="count-sub">Press Start to begin</div>
-      </div>
-      <div class="pips" id="pips"></div>
-      <div class="phrase-area" id="phrase-area">
-        <div class="phrase-top"><span>Phrase position</span><span id="phrase-pos">0 / 8</span></div>
-        <div class="phrase-track"><div class="phrase-fill" id="phrase-fill" style="width:0%"></div></div>
-      </div>
-      <div class="tap-zone">
-        <button class="tap-btn" id="tap-btn" onpointerdown="handlePracTap(event)">
-          <span class="tap-btn-icon">🥁</span>
-          <span class="tap-btn-label" id="tap-label">TAP THE BEAT</span>
-          <span class="tap-btn-sub" id="tap-sub">every count</span>
-        </button>
-        <div class="fb-pill fb-neutral" id="fb-pill">Ready when you are</div>
-        <div class="running-stats" id="run-stats" style="display:none">
-          <span id="rs-taps">0 taps</span>
-          <span id="rs-err">—</span>
-          <span id="rs-good">0 on time</span>
-        </div>
-      </div>
-      <div class="ctrl-row">
-        <button class="ctrl" id="metro-btn" onclick="toggleMetro()">
-          <span>♩</span><span class="cl">Metro</span>
-        </button>
-        <button class="play-ctrl" id="play-btn" onclick="togglePlay()">
-          <span id="play-icon">▶</span> <span id="play-lbl">Start</span>
-        </button>
-        <button class="ctrl" id="mode-btn" onclick="cycleTapMode()">
-          <span id="mode-icon">●</span><span class="cl" id="mode-lbl">Beat</span>
-        </button>
-      </div>
-      <div class="diff-row" id="diff-row">
-        <button class="diff-btn sel" data-d="1" onclick="selectDiff(1,this)">L1</button>
-        <button class="diff-btn" data-d="2" onclick="selectDiff(2,this)">L2</button>
-        <button class="diff-btn" data-d="3" onclick="selectDiff(3,this)">L3</button>
-        <button class="diff-btn" data-d="4" onclick="selectDiff(4,this)">L4</button>
-      </div>
-    </div>
-
-    <!-- ═══ CATCH THE 1 ════════════════════════════════════════ -->
-    <div class="screen" id="s-catch">
-      <div class="catch-hdr">
-        <div class="catch-title">Catch the 1</div>
-        <div class="catch-sub">Tap when you hear count "1" arrive. No numbers shown.</div>
-      </div>
-      <!-- Setup -->
-      <div id="catch-setup" class="setup-body">
-        <div>
-          <div class="setup-label">Difficulty</div>
-          <div class="diff-grid">
-            <button class="diff-card sel" data-cd="1" onclick="selectCatchDiff(1,this)">
-              <span class="diff-d">L1</span>
-              <span class="diff-sub">Count-in + slow</span>
-            </button>
-            <button class="diff-card" data-cd="2" onclick="selectCatchDiff(2,this)">
-              <span class="diff-d">L2</span>
-              <span class="diff-sub">Count-in only</span>
-            </button>
-            <button class="diff-card" data-cd="3" onclick="selectCatchDiff(3,this)">
-              <span class="diff-d">L3</span>
-              <span class="diff-sub">No aids</span>
-            </button>
-            <button class="diff-card" data-cd="4" onclick="selectCatchDiff(4,this)">
-              <span class="diff-d">L4</span>
-              <span class="diff-sub">Pure ear</span>
-            </button>
-          </div>
-        </div>
-        <div>
-          <div class="setup-label">Tempo</div>
-          <div class="tempo-pick">
-            <button class="tp-btn" data-ct="slow" style="border-color:#4CAF7D80;background:rgba(76,175,125,.1);color:#4CAF7D" onclick="selectCatchTempo('slow',this)">
-              <span style="font-family:var(--fd);font-size:13px;font-weight:700">Slow</span>
-              <span class="tp-bpm">78 BPM</span>
-            </button>
-            <button class="tp-btn" data-ct="medium" onclick="selectCatchTempo('medium',this)">
-              <span style="font-family:var(--fd);font-size:13px;font-weight:700">Medium</span>
-              <span class="tp-bpm">100 BPM</span>
-            </button>
-            <button class="tp-btn" data-ct="fast" onclick="selectCatchTempo('fast',this)">
-              <span style="font-family:var(--fd);font-size:13px;font-weight:700">Fast</span>
-              <span class="tp-bpm">120 BPM</span>
-            </button>
-          </div>
-        </div>
-        <div class="score-card">
-          <div class="setup-label" style="margin-bottom:8px">Scoring</div>
-          <div class="score-row"><span class="score-tag" style="color:var(--ok)">Perfect</span><span style="color:var(--muted)">≤50ms from "1"</span></div>
-          <div class="score-row"><span class="score-tag" style="color:var(--warn)">Good</span><span style="color:var(--muted)">≤100ms</span></div>
-          <div class="score-row"><span class="score-tag" style="color:var(--err)">Off</span><span style="color:var(--muted)">≤200ms</span></div>
-          <div class="score-row"><span class="score-tag" style="color:var(--faint)">Miss</span><span style="color:var(--muted)">&gt;200ms / wrong beat</span></div>
-        </div>
-        <button class="big-btn" onclick="startCatch()">Begin →</button>
-      </div>
-      <!-- Playing -->
-      <div id="catch-play" style="display:none;flex:1;flex-direction:column">
-        <div style="padding:16px 20px 12px;flex-shrink:0">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-            <span style="font-size:12px;color:var(--muted)" id="catch-play-meta">L1 · 78 BPM</span>
-            <span class="acc-num" id="catch-acc">—</span>
-          </div>
-          <div class="pips" id="catch-pips"></div>
-        </div>
-        <div class="play-area">
-          <button class="catch-tap-btn" id="catch-tap-btn" onpointerdown="handleCatchTap(event)">
-            <span class="catch-tap-icon">🎯</span>
-            <span class="catch-tap-label">TAP THE "1"</span>
-            <span class="catch-tap-hint">use your ear</span>
-          </button>
-          <div class="fb-pill fb-neutral" id="catch-fb">Listening...</div>
-          <div class="tally" id="catch-tally"></div>
-        </div>
-        <div style="padding:12px 20px;border-top:.5px solid var(--border)">
-          <button class="big-btn secondary" onclick="finishCatch()">Finish & Save</button>
-        </div>
-      </div>
-      <!-- Result -->
-      <div id="catch-result" style="display:none">
-        <div class="result-body">
-          <div style="text-align:center">
-            <div class="result-score" id="result-score">0%</div>
-            <div class="result-sub" id="result-sub">0 of 0 on the "1"</div>
-            <div style="font-size:13px;color:var(--muted);margin-top:4px" id="result-err"></div>
-          </div>
-          <div class="tap-list">
-            <div class="tap-list-hdr">Tap breakdown</div>
-            <div id="tap-breakdown" style="max-height:200px;overflow-y:auto"></div>
-          </div>
-          <div class="result-btns">
-            <button class="big-btn secondary" style="flex:1;margin-top:0" onclick="resetCatch()">Try Again</button>
-            <button class="big-btn" style="flex:2;margin-top:0" onclick="startCatch()">Next Round →</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ LEARN ════════════════════════════════════════════════ -->
-    <div class="screen" id="s-learn">
-      <div id="learn-list-view">
-        <div class="learn-hdr">
-          <div class="learn-title">Lessons</div>
-          <div style="font-size:13px;color:var(--muted)">Build your timing ear from first principles.</div>
-        </div>
-        <div class="lesson-list" id="lesson-list"></div>
-      </div>
-      <div id="learn-lesson-view" style="display:none;flex:1;flex-direction:column;min-height:100%"></div>
-    </div>
-
-    <!-- ═══ PROGRESS ═════════════════════════════════════════════ -->
-    <div class="screen" id="s-progress">
-      <div class="prog-hdr">
-        <div class="prog-title">Your Progress</div>
-        <div class="prog-sub" id="prog-sub">Loading...</div>
-      </div>
-      <div id="progress-body"></div>
-    </div>
-
-  </div><!-- /main -->
-
-  <!-- BOTTOM NAV -->
-  <nav id="nav">
-    <button class="nav-btn act" id="nb-home" onclick="goTo('home')"><span class="nav-icon">⌂</span>Home</button>
-    <button class="nav-btn" id="nb-learn" onclick="goTo('learn')"><span class="nav-icon">◎</span>Learn</button>
-    <button class="nav-btn" id="nb-practice" onclick="goTo('practice')"><span class="nav-icon">●</span>Practice</button>
-    <button class="nav-btn" id="nb-catch" onclick="goTo('catch')"><span class="nav-icon">◈</span>Catch 1</button>
-    <button class="nav-btn" id="nb-progress" onclick="goTo('progress')"><span class="nav-icon">▲</span>Progress</button>
-  </nav>
+<!-- ══ TRACKS ══════════════════════════════════ -->
+<div class="scr on" id="s-tracks">
+  <div class="tracks-hdr">
+    <div class="tracks-title">Choose a Track</div>
+    <div class="tracks-sub">Tap a real salsa song. Your job: find the "1" beat.</div>
+  </div>
+  <div class="tempo-filter">
+    <button class="tf-btn sel" onclick="filterTracks('all',this)">All</button>
+    <button class="tf-btn" onclick="filterTracks('slow',this)" style="color:#4CAF7D">Slow</button>
+    <button class="tf-btn" onclick="filterTracks('medium',this)" style="color:#E8A827">Medium</button>
+    <button class="tf-btn" onclick="filterTracks('fast',this)" style="color:#E05252">Fast</button>
+  </div>
+  <div class="track-list" id="track-list"></div>
 </div>
 
-<script>
-// ═══════════════════════════════════════════════════════════
-// AUDIO ENGINE — Web Audio lookahead scheduler
-// ═══════════════════════════════════════════════════════════
-const LOOKAHEAD = 0.1      // seconds ahead to schedule
-const SCHED_INTERVAL = 25  // ms between scheduler runs
-const BEATS = 8
+<!-- ══ PLAYER ══════════════════════════════════ -->
+<div class="scr" id="s-player">
+  <div class="player-hdr">
+    <div class="back-row">
+      <button class="back-btn" onclick="goToTracks()">‹</button>
+      <div class="now-title" id="now-title">—</div>
+      <div class="now-bpm" id="now-bpm">— BPM</div>
+    </div>
+    <!-- YOUTUBE EMBED -->
+    <div class="yt-wrap">
+      <iframe id="yt-frame" class="yt-frame" allow="autoplay" allowfullscreen
+        src="about:blank"></iframe>
+      <div class="yt-controls">
+        <span class="yt-time" id="yt-time">0:00</span>
+        <div class="yt-prog-track"><div class="yt-prog-fill" id="yt-prog" style="width:0%"></div></div>
+        <span style="font-size:11px;color:var(--mu)" id="yt-dur">—</span>
+      </div>
+    </div>
+  </div>
 
-class AudioEngine {
+  <!-- MODE TABS -->
+  <div class="mode-tabs">
+    <button class="mtab sel" data-m="0" onclick="setMode(0,this)"><span class="mn">Every</span>All Beats</button>
+    <button class="mtab" data-m="1" onclick="setMode(1,this)"><span class="mn">1+5</span>Basic Step</button>
+    <button class="mtab" data-m="2" onclick="setMode(2,this)"><span class="mn">①</span>Find the 1</button>
+    <button class="mtab" data-m="3" onclick="setMode(3,this)"><span class="mn">?</span>Free Test</button>
+  </div>
+
+  <!-- BEAT TIMELINE -->
+  <div class="timeline"><div class="beat-cells" id="beat-cells"></div></div>
+
+  <!-- COUNT -->
+  <div class="count-area">
+    <div class="count-big" id="count-big">—</div>
+    <div class="count-small" id="count-small">Load a track, then press Start</div>
+  </div>
+
+  <!-- TAP -->
+  <div class="tap-zone">
+    <button class="tap-btn" id="tap-btn" onpointerdown="handleTap(event)">
+      <span class="tap-btn-icon">🥁</span>
+      <span class="tap-btn-label" id="tbl">TAP THE BEAT</span>
+      <span class="tap-btn-sub" id="tbs">every count</span>
+    </button>
+    <div class="fb-pill fb-n" id="fb">Choose a track above, then Start</div>
+    <div class="run-stats" id="run-stats" style="display:none">
+      <span id="rst">0 taps</span><span id="rse">—</span><span id="rsg">0 on time</span>
+    </div>
+  </div>
+
+  <div class="ctrl-row">
+    <button class="ctrl-sm" id="metro-btn" onclick="toggleMetro()"><span>♩</span><span class="cl">Metro</span></button>
+    <button class="play-ctrl" id="play-btn" onclick="togglePlay()">
+      <span id="play-ic">▶</span><span id="play-lb">Start</span>
+    </button>
+    <button class="ctrl-sm" id="sum-btn" onclick="stopAndSummary()" style="display:none"><span>📊</span><span class="cl">Results</span></button>
+    <button class="ctrl-sm" id="diff-btn" onclick="cycleDiff()"><span id="diff-ic">L1</span><span class="cl">Level</span></button>
+  </div>
+</div>
+
+<!-- ══ PROGRESS ══════════════════════════════════ -->
+<div class="scr" id="s-progress">
+  <div class="prog-hdr"><div class="prog-title">Your Progress</div><div class="prog-sub" id="prog-sub">—</div></div>
+  <div class="unlock-card" id="unlock-card" style="display:none">
+    <div class="pu-title" id="pu-title">—</div>
+    <div class="pu-row"><div class="pu-track"><div class="pu-fill" id="pu-fill" style="width:0%"></div></div><div class="pu-lbl" id="pu-lbl">—</div></div>
+    <div style="font-size:11px;color:var(--mu);margin-top:5px" id="pu-hint">—</div>
+  </div>
+  <div class="stats-grid">
+    <div class="sg"><div class="sg-v" id="pg-oa">0%</div><div class="sg-l">Accuracy</div></div>
+    <div class="sg"><div class="sg-v" id="pg-tot">0</div><div class="sg-l">Sessions</div></div>
+    <div class="sg"><div class="sg-v" id="pg-str">0</div><div class="sg-l">Day Streak</div></div>
+  </div>
+  <div class="rings-row">
+    <div class="rc"><div class="rw"><svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="21" fill="none" stroke="var(--s2)" stroke-width="5"/><circle id="rg-slow" cx="26" cy="26" r="21" fill="none" stroke="#4CAF7D" stroke-width="5" stroke-linecap="round" stroke-dasharray="132" stroke-dashoffset="132" style="transition:stroke-dashoffset .6s"/></svg><div class="rl" id="rl-slow">0%</div></div><div class="rn">Slow</div><div class="rct" id="rc-slow">0</div></div>
+    <div class="rc"><div class="rw"><svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="21" fill="none" stroke="var(--s2)" stroke-width="5"/><circle id="rg-medium" cx="26" cy="26" r="21" fill="none" stroke="#E8A827" stroke-width="5" stroke-linecap="round" stroke-dasharray="132" stroke-dashoffset="132" style="transition:stroke-dashoffset .6s"/></svg><div class="rl" id="rl-medium">0%</div></div><div class="rn">Medium</div><div class="rct" id="rc-medium">0</div></div>
+    <div class="rc"><div class="rw"><svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="21" fill="none" stroke="var(--s2)" stroke-width="5"/><circle id="rg-fast" cx="26" cy="26" r="21" fill="none" stroke="#E05252" stroke-width="5" stroke-linecap="round" stroke-dasharray="132" stroke-dashoffset="132" style="transition:stroke-dashoffset .6s"/></svg><div class="rl" id="rl-fast">0%</div></div><div class="rn">Fast</div><div class="rct" id="rc-fast">0</div></div>
+  </div>
+  <div class="ins-cards" id="ins-cards"></div>
+  <div class="hist-sec"><span class="slbl">Session history</span><div id="hist-list"></div></div>
+</div>
+
+</div><!-- /screens -->
+
+<!-- SUMMARY OVERLAY -->
+<div id="summary">
+  <div style="text-align:center;width:100%">
+    <div class="sum-ttl">Session Complete</div>
+    <div class="sum-score" id="ss-score">0%</div>
+    <div class="sum-grade" id="ss-grade">—</div>
+  </div>
+  <div class="sum-grid">
+    <div class="sum-card"><div class="sum-val" id="ss-taps">0</div><div class="sum-lbl">Taps</div></div>
+    <div class="sum-card"><div class="sum-val" id="ss-err">—</div><div class="sum-lbl">Avg Error</div></div>
+    <div class="sum-card"><div class="sum-val" id="ss-perf">0</div><div class="sum-lbl">Perfect</div></div>
+  </div>
+  <div class="sum-insight" id="ss-ins">—</div>
+  <div class="tb-wrap">
+    <div class="tb-hdr">Last taps</div>
+    <div id="tb-list" style="max-height:160px;overflow-y:auto"></div>
+  </div>
+  <div class="sum-btns">
+    <button class="sbtn se" onclick="closeSummary()">Keep Practicing</button>
+    <button class="sbtn pr" onclick="goTo('progress');closeSummary()">See Progress →</button>
+  </div>
+</div>
+
+<nav id="nav">
+  <button class="nb on" id="nb-tracks" onclick="goTo('tracks')"><span class="nbi">🎵</span>Tracks</button>
+  <button class="nb" id="nb-player" onclick="goTo('player')"><span class="nbi">🥁</span>Practice</button>
+  <button class="nb" id="nb-progress" onclick="goTo('progress')"><span class="nbi">▲</span>Progress</button>
+</nav>
+</div><!-- /shell -->
+
+<script>
+// ══════════════════════════════════════════════════════════
+// REAL SALSA TRACKS — YouTube embeds with known BPMs
+// These are real, freely embeddable salsa songs on YouTube
+// ══════════════════════════════════════════════════════════
+const TRACKS = [
+  {
+    id: 'pedro-navaja',
+    name: 'Pedro Navaja',
+    artist: 'Rubén Blades & Willie Colón',
+    emoji: '🎺',
+    color: '#C8372D',
+    bpm: 82,
+    tempo: 'slow',
+    ytId: 'jlBMFnHPRgM',
+    tags: ['slow','classic','clave-clear'],
+    tip: 'Perfect beginner track. The bass hits the "1" very clearly on every phrase.',
+    locked: false,
+  },
+  {
+    id: 'aguanile',
+    name: 'Aguanile',
+    artist: 'Héctor Lavoe & Willie Colón',
+    emoji: '🪘',
+    color: '#8B4A2F',
+    bpm: 88,
+    tempo: 'slow',
+    ytId: 'MvZ_K07B0fo',
+    tags: ['slow','afro-cuban','drum-heavy'],
+    tip: 'Heavy conga and clave. Listen for the conga tumba landing on beat 1.',
+    locked: false,
+  },
+  {
+    id: 'el-cantante',
+    name: 'El Cantante',
+    artist: 'Héctor Lavoe',
+    emoji: '🎙️',
+    color: '#5B3A8A',
+    bpm: 95,
+    tempo: 'medium',
+    ytId: 'l-5Gy0Yw2Fg',
+    tags: ['medium','classic','piano-lead'],
+    tip: 'Medium pace. The piano montuno gives strong phrase markers every 8 beats.',
+    locked: false,
+  },
+  {
+    id: 'cali-pachanguero',
+    name: 'Cali Pachanguero',
+    artist: 'Grupo Niche',
+    emoji: '🌴',
+    color: '#2D7A4F',
+    bpm: 100,
+    tempo: 'medium',
+    ytId: 'vdwMUKzQflk',
+    tags: ['medium','cali-style','energetic'],
+    tip: 'Classic Cali salsa feel. The "1" is very pronounced — let the horns guide you.',
+    locked: false,
+  },
+  {
+    id: 'vivir-mi-vida',
+    name: 'Vivir Mi Vida',
+    artist: 'Marc Anthony',
+    emoji: '✨',
+    color: '#1A5C8A',
+    bpm: 104,
+    tempo: 'medium',
+    ytId: 'YnwqHGcBLHk',
+    tags: ['medium','modern','well-known'],
+    tip: 'One of the most famous salsa songs. Great for training because of its clear 8-count phrasing.',
+    locked: false,
+  },
+  {
+    id: 'la-vida-es-un-carnival',
+    name: 'La Vida Es Un Carnaval',
+    artist: 'Celia Cruz',
+    emoji: '🌺',
+    color: '#8A6A1A',
+    bpm: 108,
+    tempo: 'medium',
+    ytId: 'OEhkIPVAILQ',
+    tags: ['medium','classic','celia'],
+    tip: 'Celia Cruz with clear rhythm section. The bass tumbao is very audible.',
+    locked: false,
+  },
+  {
+    id: 'la-murga',
+    name: 'La Murga',
+    artist: 'Willie Colón',
+    emoji: '🎷',
+    color: '#C8372D',
+    bpm: 114,
+    tempo: 'fast',
+    ytId: 'FvNnzYaOdgI',
+    tags: ['fast','hard-salsa','challenge'],
+    tip: 'This is salsa dura at speed. The clave pattern is your only guide — count it.',
+    locked: true,
+  },
+  {
+    id: 'quimbara',
+    name: 'Quimbara',
+    artist: 'Celia Cruz & Johnny Pacheco',
+    emoji: '🔥',
+    color: '#A84F1A',
+    bpm: 118,
+    tempo: 'fast',
+    ytId: 'HqWLFKLm3yY',
+    tags: ['fast','guaguancó','expert'],
+    tip: 'Fast and complex. If you can find the "1" here, you\'re becoming a real salsero.',
+    locked: true,
+  },
+];
+
+// ══════════════════════════════════════════════════════════
+// AUDIO ENGINE — Web Audio lookahead scheduler
+// Runs in parallel with YouTube playback
+// ══════════════════════════════════════════════════════════
+class SalsaSynth {
+  constructor(ctx, out) { this.ctx=ctx; this.out=out; }
+  clave(t, accent) {
+    const ctx=this.ctx, sr=ctx.sampleRate, len=sr*.09;
+    const buf=ctx.createBuffer(1,len,sr), d=buf.getChannelData(0);
+    for(let i=0;i<len;i++){const e=Math.exp(-i/(sr*.018));d[i]=e*(Math.sin(2*Math.PI*2400*i/sr)*.55+Math.sin(2*Math.PI*3700*i/sr)*.35+(Math.random()-.5)*.08);}
+    const s=ctx.createBufferSource(), g=ctx.createGain();
+    s.buffer=buf;s.connect(g);g.connect(this.out);g.gain.setValueAtTime(accent?1.0:.6,t);s.start(t);
+  }
+  conga(t,type){
+    const ctx=this.ctx, sr=ctx.sampleRate;
+    const dur=type==='slap'?.07:type==='muted'?.12:.22;
+    const buf=ctx.createBuffer(1,sr*dur,sr), d=buf.getChannelData(0);
+    const f0=type==='slap'?340:type==='muted'?240:160;
+    for(let i=0;i<sr*dur;i++){const t2=i/sr,e=Math.exp(-t2/(type==='slap'?.012:.09));d[i]=e*(Math.sin(2*Math.PI*(f0+280*Math.exp(-t2*90))*t2)*.72+(Math.random()*2-1)*.25*Math.exp(-t2/.012));}
+    const s=ctx.createBufferSource(), g=ctx.createGain();
+    s.buffer=buf;s.connect(g);g.connect(this.out);g.gain.setValueAtTime(type==='slap'?.7:.85,t);s.start(t);
+  }
+  click(t,isOne,isCI){
+    const ctx=this.ctx, o=ctx.createOscillator(), g=ctx.createGain();
+    o.connect(g);g.connect(this.out);o.frequency.value=isOne?920:isCI?720:520;o.type='sine';
+    const v=isOne?.5:isCI?.4:.22;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.003);g.gain.exponentialRampToValueAtTime(.001,t+.07);
+    o.start(t);o.stop(t+.1);
+  }
+}
+
+const CLAVE=[1,0,1,0,1,0,0,1];
+const CONGA=['open','muted','slap','open','open','muted','slap','open'];
+
+class Engine {
   constructor(){
-    this.ctx = null; this.masterGain = null
-    this._timer = null; this._nextBeat = 0; this._beat = 0
-    this._bpm = 80; this._running = false
-    this._metronome = false; this._latency = 0
-    this._history = []; this._onBeat = null
+    this.ctx=null;this.master=null;this.synth=null;
+    this._t=null;this._next=0;this._beat=0;this._bpm=82;
+    this._running=false;this._metro=false;this._lat=0;
+    this._hist=[];this._cb=null;this._ci=0;this._ciLeft=0;
   }
   async init(){
-    if(this.ctx) return
-    this.ctx = new(window.AudioContext||window.webkitAudioContext)()
-    this.masterGain = this.ctx.createGain()
-    this.masterGain.gain.value = 0.7
-    this.masterGain.connect(this.ctx.destination)
-    if(this.ctx.state==='suspended') await this.ctx.resume()
+    if(this.ctx)return;
+    this.ctx=new(window.AudioContext||window.webkitAudioContext)();
+    this.master=this.ctx.createGain();this.master.gain.value=0.55;
+    this.master.connect(this.ctx.destination);
+    this.synth=new SalsaSynth(this.ctx,this.master);
   }
-  async resume(){ if(this.ctx?.state==='suspended') await this.ctx.resume() }
-
-  start(bpm, countIn=4, onBeat=null){
-    if(this._running) this.stop()
-    this._bpm=bpm; this._onBeat=onBeat
-    this._beat=-countIn; this._history=[]; this._running=true
-    this._nextBeat=this.ctx.currentTime+0.1
-    this._sched()
+  async resume(){if(this.ctx?.state==='suspended')await this.ctx.resume();}
+  start(bpm,countIn,cb){
+    if(this._running)this.stop();
+    this._bpm=bpm;this._ci=countIn;this._ciLeft=countIn;
+    this._cb=cb;this._beat=0;this._hist=[];this._running=true;
+    this._next=this.ctx.currentTime+0.1;this._sched();
   }
-  stop(){ this._running=false; clearTimeout(this._timer); this._history=[] }
-
+  stop(){this._running=false;clearTimeout(this._t);this._hist=[];}
   _sched(){
-    if(!this._running) return
-    const now=this.ctx.currentTime
-    while(this._nextBeat < now+LOOKAHEAD){
-      this._scheduleBeat(this._beat, this._nextBeat)
-      this._nextBeat += 60/this._bpm
-      this._beat++
-      if(this._beat>=BEATS) this._beat=0
-    }
-    this._timer=setTimeout(()=>this._sched(), SCHED_INTERVAL)
+    if(!this._running)return;
+    while(this._next<this.ctx.currentTime+0.12){this._schB(this._next);this._next+=60/this._bpm;}
+    this._t=setTimeout(()=>this._sched(),18);
   }
-  _scheduleBeat(idx, t){
-    const isCountIn = idx<0
-    const phraseIdx = isCountIn ? idx : idx%BEATS
-    const isOne = phraseIdx===0
-    if(!isCountIn){
-      this._history.push({time:t, beatIndex:phraseIdx})
-      if(this._history.length>32) this._history.shift()
+  _schB(t){
+    if(this._ciLeft>0){
+      this.synth.click(t,false,true);
+      const ci=this._ciLeft, delay=(t-this.ctx.currentTime)*1000;
+      setTimeout(()=>{if(this._running&&this._cb)this._cb(-ci,t,true);},Math.max(0,delay));
+      this._ciLeft--;return;
     }
-    if(this._metronome||isOne||isCountIn) this._click(t,isOne,isCountIn)
-    if(this._onBeat){
-      const delay=(t-this.ctx.currentTime)*1000
-      setTimeout(()=>{ if(this._running) this._onBeat(phraseIdx,t,isCountIn) }, Math.max(0,delay))
-    }
-  }
-  _click(t, isOne, isCountIn){
-    const osc=this.ctx.createOscillator()
-    const g=this.ctx.createGain()
-    osc.connect(g); g.connect(this.masterGain)
-    osc.frequency.value = isOne?900:isCountIn?700:500
-    osc.type='sine'
-    const v=isOne?.5:isCountIn?.35:.2
-    g.gain.setValueAtTime(0,t)
-    g.gain.linearRampToValueAtTime(v,t+.003)
-    g.gain.exponentialRampToValueAtTime(.001,t+.08)
-    osc.start(t); osc.stop(t+.1)
+    const beat=this._beat, isOne=beat===0;
+    this._hist.push({time:t,beat});
+    if(this._hist.length>32)this._hist.shift();
+    // Clave + conga as timing guide (subtle, so YouTube audio dominates)
+    if(CLAVE[beat])this.synth.clave(t,isOne);
+    if(CONGA[beat])this.synth.conga(t,CONGA[beat]);
+    if(this._metro)this.synth.click(t,isOne,false);
+    const delay=(t-this.ctx.currentTime)*1000;
+    setTimeout(()=>{if(this._running&&this._cb)this._cb(beat,t,false);},Math.max(0,delay));
+    this._beat=(this._beat+1)%8;
   }
   scoreTap(tapT){
-    const comp = (tapT??this.ctx.currentTime) - this._latency
-    if(!this._history.length) return {error:null,rating:'early',isOne:false}
-    const beatDur=60/this._bpm
-    let nearest=null, minD=Infinity
-    for(const b of this._history){
-      const d=Math.abs(comp-b.time)
-      if(d<minD){minD=d;nearest=b}
-    }
-    if(!nearest) return {error:null,rating:'miss',isOne:false}
-    const err=comp-nearest.time
-    const errMs=Math.round(err*1000)
-    const abs=Math.abs(err)
-    const isOne=nearest.beatIndex===0
-    let rating = abs<=.05?'perfect':abs<=.1?'good':abs<=.2?'off':'miss'
-    const dir = err<-.02?'early':err>.02?'late':'center'
-    const scores={perfect:100,good:75,off:40,miss:0}
-    return{errMs,absErrMs:Math.abs(errMs),rating,direction:dir,isOne,nearestBeat:nearest.beatIndex,score:scores[rating]??0}
+    const comp=(tapT??this.ctx.currentTime)-this._lat;
+    if(!this._hist.length)return{errMs:null,rating:'miss',isOne:false,score:0};
+    let nearest=null,minD=Infinity;
+    for(const b of this._hist){const d=Math.abs(comp-b.time);if(d<minD){minD=d;nearest=b;}}
+    if(!nearest)return{errMs:null,rating:'miss',isOne:false,score:0};
+    const err=comp-nearest.time, errMs=Math.round(err*1000), abs=Math.abs(err);
+    const isOne=nearest.beat===0;
+    const rating=abs<=.05?'perfect':abs<=.12?'good':abs<=.22?'off':'miss';
+    const dir=err<-.025?'early':err>.025?'late':'center';
+    return{errMs,absErrMs:Math.abs(errMs),rating,direction:dir,isOne,nearestBeat:nearest.beat,score:{perfect:100,good:75,off:35,miss:0}[rating]};
   }
-  now(){ return this.ctx?.currentTime??0 }
-  setMetronome(v){ this._metronome=v }
-  setLatency(ms){ this._latency=ms/1000 }
-  get isRunning(){ return this._running }
-  get bpm(){ return this._bpm }
-}
-const engine = new AudioEngine()
-
-// ═══════════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════════
-const TEMPOS = { slow:{bpm:78,color:'#4CAF7D'}, medium:{bpm:100,color:'#E8A827'}, fast:{bpm:120,color:'#E05252'} }
-const DIFF = {
-  1:{label:'Level 1',showCount:true,showPhrase:true,countIn:4},
-  2:{label:'Level 2',showCount:false,showPhrase:true,countIn:4},
-  3:{label:'Level 3',showCount:false,showPhrase:true,countIn:0},
-  4:{label:'Level 4',showCount:false,showPhrase:false,countIn:0}
+  now(){return this.ctx?.currentTime??0;}
+  setMetro(v){this._metro=v;}
+  get isRunning(){return this._running;}
 }
 
-let S = {
-  screen:'home', isPlaying:false,
-  tempo:'slow', diff:1, tapMode:'beat',
-  metro:false, currentBeat:-1,
-  sessionTaps:[], sessionStart:null, lastFeedback:null,
-  catchDiff:1, catchTempo:'slow', catchPhase:'setup',
-  catchTaps:[], catchStart:null,
-  completedLessons:new Set(), activeLesson:null, lessonStep:0,
-  sessions: JSON.parse(localStorage.getItem('s1sessions')||'[]'),
-  prefs: JSON.parse(localStorage.getItem('s1prefs')||'{"latency":0}'),
+const engine=new Engine();
+
+// ══════════════════════════════════════════════════════════
+// APP STATE
+// ══════════════════════════════════════════════════════════
+const DIFFS={
+  1:{showCount:true,showPhrase:true,countIn:4},
+  2:{showCount:false,showPhrase:true,countIn:4},
+  3:{showCount:false,showPhrase:false,countIn:0},
+  4:{showCount:false,showPhrase:false,countIn:0},
+};
+const MODES=[
+  {label:'Every Beat',sub:'every count'},
+  {label:'1 and 5',sub:'basic step timing'},
+  {label:'Find the 1',sub:'only on beat 1'},
+  {label:'Free Test',sub:'tap freely'},
+];
+
+let S={
+  screen:'tracks',playing:false,
+  track:null,diff:1,mode:0,metro:false,
+  beat:-1,taps:[],start:null,
+  unlocked:{slow:true,medium:false,fast:false},
+  sessions:JSON.parse(localStorage.getItem('s1sess')||'[]'),
+  ytReady:false,
+};
+
+function persist(){localStorage.setItem('s1sess',JSON.stringify(S.sessions.slice(-300)));}
+
+function updateUnlocks(){
+  const slowSess=S.sessions.filter(s=>s.tempo==='slow');
+  const slowAcc=slowSess.length?avg(slowSess.map(s=>s.accuracy)):0;
+  const medSess=S.sessions.filter(s=>s.tempo==='medium');
+  const medAcc=medSess.length?avg(medSess.map(s=>s.accuracy)):0;
+  S.unlocked.medium=slowAcc>=60;
+  S.unlocked.fast=medAcc>=60;
 }
 
-function saveSession(rec){
-  S.sessions.push(rec)
-  if(S.sessions.length>200) S.sessions=S.sessions.slice(-200)
-  localStorage.setItem('s1sessions', JSON.stringify(S.sessions))
-}
-function saveLessons(){
-  localStorage.setItem('s1lessons', JSON.stringify([...S.completedLessons]))
-}
-
-// Load persisted data
-try{ S.completedLessons=new Set(JSON.parse(localStorage.getItem('s1lessons')||'[]')) }catch(e){}
-
-// ═══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 // NAVIGATION
-// ═══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 function goTo(name){
-  if(S.isPlaying && name!=='practice') { stopPlay(); }
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'))
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('act'))
-  document.getElementById('s-'+name).classList.add('on')
-  const nb=document.getElementById('nb-'+name)
-  if(nb) nb.classList.add('act')
-  S.screen=name
-  if(name==='progress') renderProgress()
-  if(name==='learn') renderLearnList()
-  if(name==='home') renderHome()
+  if(S.playing)stopPlay();
+  if(document.getElementById('summary').classList.contains('on'))closeSummary();
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  const scr=document.getElementById('s-'+name);
+  if(scr)scr.classList.add('on');
+  const nb=document.getElementById('nb-'+name);
+  if(nb)nb.classList.add('on');
+  S.screen=name;
+  if(name==='progress')renderProgress();
+  if(name==='tracks')renderTracks('all');
 }
 
-// ═══════════════════════════════════════════════════════════
-// HOME
-// ═══════════════════════════════════════════════════════════
-function renderHome(){
-  const stats=computeStats()
-  // Streak badge
-  if(stats.streak>0){
-    document.getElementById('streak-badge').style.display='block'
-    document.getElementById('streak-num').textContent=stats.streak
-  }
-  // Rings
-  updateRing('slow',stats.byTempo.slow.accuracy)
-  updateRing('medium',stats.byTempo.medium.accuracy)
-  updateRing('fast',stats.byTempo.fast.accuracy)
-  // Recommend session
-  const slowAcc=stats.byTempo.slow.accuracy
-  const rec = slowAcc<50?{label:'5-Min Quick',dur:5}:slowAcc<75?{label:'10-Min Standard',dur:10}:{label:'15-Min Focused',dur:15}
-  document.getElementById('daily-title').textContent=rec.label
-  document.getElementById('daily-dur').textContent=rec.dur+' min'
-}
-function updateRing(id, pct){
-  const circ=144; const offset=circ-(pct/100)*circ
-  const c=document.getElementById('rc-'+id)
-  const l=document.getElementById('rl-'+id)
-  if(c) setTimeout(()=>c.setAttribute('stroke-dashoffset',offset),100)
-  if(l) l.textContent=pct+'%'
+function goToTracks(){goTo('tracks');}
+
+// ══════════════════════════════════════════════════════════
+// TRACK LIST
+// ══════════════════════════════════════════════════════════
+let currentFilter='all';
+
+function renderTracks(filter){
+  currentFilter=filter;
+  updateUnlocks();
+  const list=document.getElementById('track-list');
+  list.innerHTML='';
+  const visible=TRACKS.filter(t=>filter==='all'||t.tempo===filter);
+  visible.forEach(track=>{
+    const isLocked=track.locked&&!S.unlocked[track.tempo];
+    const div=document.createElement('div');
+    div.className='track-card'+(isLocked?' locked':'');
+    const tagHTML=track.tags.map(tg=>{
+      const cls=tg==='slow'?'tag-slow':tg==='medium'?'tag-medium':tg==='fast'?'tag-fast':'tag-info';
+      return`<span class="tag ${cls}">${tg}</span>`;
+    }).join('');
+    const tempoCls=track.tempo==='slow'?'tag-slow':track.tempo==='medium'?'tag-medium':'tag-fast';
+    div.innerHTML=`
+      <div class="track-thumb" style="background:${track.color}22;border:1px solid ${track.color}40">
+        <span>${track.emoji}</span>
+        ${isLocked?`<div class="track-lock">🔒</div>`:''}
+      </div>
+      <div class="track-info">
+        <div class="track-name">${track.name}</div>
+        <div class="track-artist">${track.artist}</div>
+        <div class="track-tags"><span class="tag ${tempoCls}">${track.tempo}</span>${isLocked?'<span class="tag tag-info">Locked</span>':''}</div>
+      </div>
+      <div class="track-bpm">${track.bpm}<br><span style="font-size:9px;color:var(--mu)">BPM</span></div>`;
+    if(!isLocked){
+      div.onclick=()=>loadTrack(track);
+    }
+    list.appendChild(div);
+  });
 }
 
-// ═══════════════════════════════════════════════════════════
-// PRACTICE ENGINE
-// ═══════════════════════════════════════════════════════════
-function initPips(containerId){
-  const row=document.getElementById(containerId)
-  if(!row) return
-  row.innerHTML=''
+function filterTracks(f,btn){
+  document.querySelectorAll('.tf-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  renderTracks(f);
+}
+
+// ══════════════════════════════════════════════════════════
+// YOUTUBE PLAYER
+// ══════════════════════════════════════════════════════════
+let ytPlayer=null;
+let ytInterval=null;
+
+function loadYT(ytId){
+  const frame=document.getElementById('yt-frame');
+  // YouTube embed with autoplay disabled, JS API enabled
+  frame.src=`https://www.youtube.com/embed/${ytId}?enablejsapi=1&autoplay=0&controls=1&rel=0&modestbranding=1&color=white&origin=${encodeURIComponent(location.origin||'https://scoobylab-bot.github.io')}`;
+  document.getElementById('yt-prog').style.width='0%';
+  document.getElementById('yt-time').textContent='0:00';
+  document.getElementById('yt-dur').textContent='—';
+  // Poll for duration since postMessage API is cross-origin restricted on GitHub Pages
+  clearInterval(ytInterval);
+}
+
+function formatTime(s){
+  const m=Math.floor(s/60), sec=Math.floor(s%60);
+  return m+':'+(sec<10?'0':'')+sec;
+}
+
+// ══════════════════════════════════════════════════════════
+// LOAD TRACK
+// ══════════════════════════════════════════════════════════
+function loadTrack(track){
+  if(S.playing)stopPlay();
+  S.track=track;
+  S.taps=[];S.beat=-1;
+  document.getElementById('now-title').textContent=track.name+' — '+track.artist;
+  document.getElementById('now-bpm').textContent=track.bpm+' BPM';
+  loadYT(track.ytId);
+  setFB('fb','▶ Press Start to begin counting — music plays separately','n');
+  document.getElementById('count-big').textContent='—';
+  document.getElementById('count-small').textContent=track.tip;
+  goTo('player');
+  // Update nav
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.getElementById('nb-player').classList.add('on');
+}
+
+// ══════════════════════════════════════════════════════════
+// BUILD BEAT TIMELINE
+// ══════════════════════════════════════════════════════════
+function buildTimeline(){
+  const el=document.getElementById('beat-cells');el.innerHTML='';
   for(let i=0;i<8;i++){
-    const p=document.createElement('div')
-    p.className='pip'+(i===0?' one':'')
-    p.id=(containerId==='pips'?'pp':'cp')+i
-    row.appendChild(p)
+    const w=document.createElement('div');w.className='bc-wrap';
+    const bar=document.createElement('div');bar.className='bc-bar';bar.id='bt-'+i;
+    const num=document.createElement('div');num.className='bc-num';num.id='bn-'+i;num.textContent=i+1;
+    w.appendChild(bar);w.appendChild(num);el.appendChild(w);
   }
 }
 
+// ══════════════════════════════════════════════════════════
+// PRACTICE ENGINE
+// ══════════════════════════════════════════════════════════
 async function togglePlay(){
-  if(S.isPlaying){ stopPlay(); return }
-  await engine.init()
-  await engine.resume()
-  S.isPlaying=true; S.sessionTaps=[]; S.sessionStart=Date.now(); S.lastFeedback=null
-  const dc=DIFF[S.diff]; const tc=TEMPOS[S.tempo]
-  engine.setMetronome(S.metro)
-  engine.setLatency(S.prefs.latency||0)
-  engine.start(tc.bpm, dc.countIn, (beatIdx, t, isCountIn)=>{
-    if(!isCountIn){ S.currentBeat=beatIdx; onBeat(beatIdx) }
-    else { updateCountDisplay(null,true,beatIdx) }
-  })
-  document.getElementById('play-btn').classList.add('running')
-  document.getElementById('play-icon').textContent='⏹'
-  document.getElementById('play-lbl').textContent='Stop'
-  document.getElementById('tap-btn').classList.add('playing')
-  document.getElementById('count-sub').textContent=dc.countIn>0?'Count-in...':S.tapMode==='one'?'listening...':'tap every beat'
-  document.getElementById('diff-row').style.opacity='.5'
-  initPips('pips')
+  if(S.playing){stopPlay();return;}
+  if(!S.track){setFB('fb','Pick a track first from the Tracks tab','m');return;}
+  await engine.init();await engine.resume();
+  S.playing=true;S.taps=[];S.start=Date.now();S.beat=-1;
+  const dc=DIFFS[S.diff];
+  engine.setMetro(S.metro);
+  engine.start(S.track.bpm, dc.countIn, (beat,t,isCI)=>{
+    if(isCI){
+      document.getElementById('count-big').textContent=Math.abs(beat);
+      document.getElementById('count-big').style.color='var(--mu)';
+      document.getElementById('count-small').textContent='Count-in — get ready...';
+      return;
+    }
+    S.beat=beat;onBeat(beat,dc);
+  });
+  document.getElementById('play-btn').classList.add('stop');
+  document.getElementById('play-ic').textContent='⏹';
+  document.getElementById('play-lb').textContent='Stop';
+  document.getElementById('tap-btn').classList.add('ready');
+  document.getElementById('sum-btn').style.display='flex';
+  setFB('fb',MODES[S.mode].label+' — '+MODES[S.mode].sub,'n');
 }
 
 function stopPlay(){
-  engine.stop(); S.isPlaying=false
-  // Save session
-  const sr=buildSessionRecord(S.sessionTaps, S.tempo, S.tapMode==='one'?'catch-one':'guided', S.sessionStart)
-  if(sr && sr.tapCount>=4){ saveSession(sr) }
-  // Reset UI
-  document.getElementById('play-btn').classList.remove('running')
-  document.getElementById('play-icon').textContent='▶'
-  document.getElementById('play-lbl').textContent='Start'
-  document.getElementById('tap-btn').classList.remove('playing')
-  document.getElementById('count-big').textContent='—'
-  document.getElementById('count-big').style.color='var(--text)'
-  document.getElementById('count-sub').textContent='Press Start to begin'
-  document.getElementById('diff-row').style.opacity='1'
-  document.querySelectorAll('.pip').forEach((p,i)=>{ p.className='pip'+(i===0?' one':'') })
-  document.getElementById('phrase-fill').style.width='0%'
-  document.getElementById('phrase-pos').textContent='0 / 8'
-  document.getElementById('prac-acc').textContent='—'
-  document.getElementById('run-stats').style.display='none'
-  setFeedback('fb-pill','Stopped. Press ▶ to restart.','neutral')
-  S.sessionTaps=[]; S.currentBeat=-1
+  engine.stop();S.playing=false;
+  const rec=buildRec(S.taps,S.track?.tempo,S.track?.bpm,S.diff,S.mode,S.start);
+  if(rec&&rec.tapCount>=4){S.sessions.push(rec);updateUnlocks();persist();}
+  resetUI();
 }
 
-function onBeat(idx){
-  const isOne=idx===0
-  const dc=DIFF[S.diff]
-  // Count display
-  updateCountDisplay(idx,false,null)
-  // Pips
+function stopAndSummary(){
+  engine.stop();S.playing=false;
+  const rec=buildRec(S.taps,S.track?.tempo,S.track?.bpm,S.diff,S.mode,S.start);
+  if(rec&&rec.tapCount>=3){S.sessions.push(rec);updateUnlocks();persist();}
+  resetUI();showSummary(rec);
+}
+
+function resetUI(){
+  document.getElementById('play-btn').classList.remove('stop');
+  document.getElementById('play-ic').textContent='▶';
+  document.getElementById('play-lb').textContent='Start';
+  document.getElementById('tap-btn').classList.remove('ready');
+  document.getElementById('sum-btn').style.display='none';
+  document.getElementById('count-big').textContent='—';
+  document.getElementById('count-big').className='count-big';
+  document.getElementById('sacc')&&(document.getElementById('sacc').textContent='—');
+  document.getElementById('run-stats').style.display='none';
   for(let i=0;i<8;i++){
-    const p=document.getElementById('pp'+i)
-    if(!p) continue
-    p.className='pip'+(i===0?' one':'')+(i===idx?' cur '+(isOne?'one':'other'):'')
+    const b=document.getElementById('bt-'+i);if(b)b.className='bc-bar';
+    const n=document.getElementById('bn-'+i);if(n)n.className='bc-num';
   }
-  // Phrase bar
-  if(dc.showPhrase){
-    document.getElementById('phrase-fill').style.width=((idx+1)/8*100)+'%'
-    document.getElementById('phrase-fill').style.background=isOne?'var(--red)':'var(--gold)'
-    document.getElementById('phrase-pos').textContent=(idx+1)+' / 8'
-  }
-  // Tap mode hint
-  if(S.tapMode==='one' && isOne) document.getElementById('count-sub').textContent='← TAP NOW →'
-  else if(S.tapMode==='one') document.getElementById('count-sub').textContent='listening...'
+  S.taps=[];S.beat=-1;
 }
 
-function updateCountDisplay(idx, isCountIn, countInIdx){
-  const el=document.getElementById('count-big')
-  const dc=DIFF[S.diff]
-  if(isCountIn){
-    el.textContent=Math.abs(countInIdx)
-    el.style.color='var(--muted)'
-    return
+function onBeat(beat,dc){
+  const isOne=beat===0;
+  const cn=document.getElementById('count-big');
+  if(dc.showCount){cn.textContent=beat+1;cn.className='count-big '+(isOne?'f1':'fb');setTimeout(()=>cn.className='count-big',140);}
+  else{cn.textContent='●';cn.style.color=isOne?'var(--red)':'var(--tx)';}
+  for(let i=0;i<8;i++){
+    const b=document.getElementById('bt-'+i);
+    if(b)b.className='bc-bar'+(i===beat?(isOne?' lit-one':' lit-other'):'');
+    const n=document.getElementById('bn-'+i);
+    if(n){n.className='bc-num';if(dc.showCount)n.classList.add(i===0?'show-one':'show');}
   }
-  if(dc.showCount){ el.textContent=idx+1 }
-  else { el.textContent='●' }
-  el.style.color=idx===0?'var(--red)':'var(--text)'
+  const hint=document.getElementById('count-small');
+  if(S.mode===1)hint.textContent=isOne?'← TAP: 1 →':(beat===4?'← TAP: 5 →':'...');
+  else if(S.mode===2)hint.textContent=isOne?'← TAP THE "1" NOW →':'listening...';
+  else if(S.mode===0)hint.textContent='tap every beat';
+  else hint.textContent='tap freely with the music';
 }
 
-function handlePracTap(e){
-  e.preventDefault()
-  if(!engine.isRunning) return
-  const tapT=engine.now()
-  const r=engine.scoreTap(tapT)
-  S.sessionTaps.push({...r,ts:Date.now()})
-  // Ripple
-  const btn=document.getElementById('tap-btn')
-  const rip=document.createElement('div'); rip.className='ripple-el'; btn.appendChild(rip)
-  setTimeout(()=>rip.remove(),500)
-  // Feedback
-  const fb=buildFeedback(r)
-  setFeedback('fb-pill',fb.msg,fb.type)
-  // Running stats
-  updateRunStats()
-  // Haptic
-  if(navigator.vibrate) navigator.vibrate(r.rating==='perfect'?[10,20,10]:r.rating==='miss'?[60]:[8])
+function handleTap(e){
+  e.preventDefault();
+  if(!engine.isRunning)return;
+  const r=engine.scoreTap(engine.now());
+  if(S.mode===1&&S.beat>=0&&![0,4].includes(S.beat))r.score=Math.max(0,r.score-20);
+  if(S.mode===2&&S.beat>=0&&S.beat!==0)r.score=Math.max(0,r.score-30);
+  S.taps.push({...r,ts:Date.now()});
+  const btn=document.getElementById('tap-btn');
+  const rip=document.createElement('div');rip.className='rip';btn.appendChild(rip);
+  setTimeout(()=>rip.remove(),550);
+  setFB('fb',buildFB(r).msg,buildFB(r).cls);
+  updateRunStats();
+  if(navigator.vibrate)navigator.vibrate(r.rating==='perfect'?[8,25,8]:r.rating==='miss'?[55]:[6]);
 }
 
-function buildFeedback(r){
-  if(r.rating==='perfect') return r.isOne?{msg:'The "1" — Perfect!',type:'perfect'}:{msg:'On time ✓',type:'perfect'}
-  if(r.rating==='good') return {msg:r.direction==='early'?'Slightly early':'Slightly late',type:'good'}
-  if(r.rating==='off') return {msg:r.direction==='early'?'Early — relax':'Late — anticipate',type:'off'}
-  return {msg:r.isOne===false?'Not the "1" — keep listening':'Missed — re-orient',type:'miss'}
+function buildFB(r){
+  if(S.mode===1&&r.nearestBeat!==undefined&&![0,4].includes(r.nearestBeat))return{msg:'Wait for 1 or 5',cls:'m'};
+  if(S.mode===2&&r.nearestBeat!==undefined&&r.nearestBeat!==0)return{msg:'Not the "1" — keep listening',cls:'m'};
+  if(r.rating==='perfect'){
+    if(r.isOne)return{msg:'The "1" — Locked in! ✓',cls:'p'};
+    return{msg:'Perfect timing ✓',cls:'p'};
+  }
+  if(r.rating==='good'){
+    if(r.direction==='early')return{msg:'Slightly early — relax',cls:'g'};
+    if(r.direction==='late')return{msg:'Slightly late — anticipate',cls:'g'};
+    return{msg:'Good ✓',cls:'g'};
+  }
+  if(r.rating==='off'){
+    if(r.direction==='early')return{msg:'Rushing — breathe',cls:'o'};
+    if(r.direction==='late')return{msg:'Behind the beat — push forward',cls:'o'};
+    return{msg:'Off the beat',cls:'o'};
+  }
+  return{msg:'Missed — re-orient on the bass',cls:'m'};
+}
+
+function setFB(id,msg,cls){
+  const el=document.getElementById(id);
+  if(el){el.textContent=msg;el.className='fb-pill fb-'+cls;}
 }
 
 function updateRunStats(){
-  const taps=S.sessionTaps, n=taps.length
-  if(n===0) return
-  const good=taps.filter(t=>['perfect','good'].includes(t.rating)).length
-  const acc=Math.round(good/n*100)
-  const errs=taps.filter(t=>t.absErrMs!=null).map(t=>t.absErrMs)
-  const avgErr=errs.length?Math.round(errs.reduce((a,b)=>a+b,0)/errs.length):null
-  document.getElementById('prac-acc').textContent=acc+'%'
-  document.getElementById('run-stats').style.display='flex'
-  document.getElementById('rs-taps').textContent=n+' taps'
-  document.getElementById('rs-err').textContent=avgErr!==null?'avg '+avgErr+'ms off':'—'
-  document.getElementById('rs-good').textContent=good+' on time'
-}
-
-function setFeedback(elId, msg, type){
-  const el=document.getElementById(elId)
-  if(!el) return
-  el.textContent=msg
-  el.className='fb-pill fb-'+type
+  const t=S.taps,n=t.length;if(!n)return;
+  const good=t.filter(x=>['perfect','good'].includes(x.rating)).length;
+  const acc=Math.round(good/n*100);
+  const errs=t.filter(x=>x.absErrMs!=null).map(x=>x.absErrMs);
+  const avgE=errs.length?Math.round(errs.reduce((a,b)=>a+b,0)/errs.length):null;
+  document.getElementById('run-stats').style.display='flex';
+  document.getElementById('rst').textContent=n+' taps';
+  document.getElementById('rse').textContent=avgE!==null?'avg '+avgE+'ms':'—';
+  document.getElementById('rsg').textContent=good+' on time';
 }
 
 function toggleMetro(){
-  S.metro=!S.metro; engine.setMetronome(S.metro)
-  const btn=document.getElementById('metro-btn')
-  btn.classList.toggle('gold-on',S.metro)
-}
-function cycleTapMode(){
-  S.tapMode=S.tapMode==='beat'?'one':'beat'
-  const isOne=S.tapMode==='one'
-  document.getElementById('mode-icon').textContent=isOne?'①':'●'
-  document.getElementById('mode-lbl').textContent=isOne?'The 1':'Beat'
-  document.getElementById('tap-label').textContent=isOne?'TAP THE "1"':'TAP THE BEAT'
-  document.getElementById('tap-sub').textContent=isOne?'only on count 1':'every count'
-  document.getElementById('mode-btn').classList.toggle('red-on',isOne)
-}
-function selectTempo(t,btn){
-  if(S.isPlaying) return
-  S.tempo=t
-  document.querySelectorAll('.tempo-btn').forEach(b=>b.classList.remove('sel'))
-  btn.classList.add('sel')
-}
-function selectDiff(d,btn){
-  if(S.isPlaying) return
-  S.diff=d
-  document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('sel'))
-  btn.classList.add('sel')
-  const dc=DIFF[d]
-  document.getElementById('prac-level-pill').textContent=dc.label+' · '+(dc.showCount?'Visual count':'No count')
-  document.getElementById('phrase-area').style.display=dc.showPhrase?'block':'none'
+  S.metro=!S.metro;engine.setMetro(S.metro);
+  document.getElementById('metro-btn').classList.toggle('gold',S.metro);
 }
 
-// ═══════════════════════════════════════════════════════════
-// CATCH THE 1
-// ═══════════════════════════════════════════════════════════
-function selectCatchDiff(d,btn){
-  S.catchDiff=d
-  document.querySelectorAll('.diff-card').forEach(b=>b.classList.remove('sel'))
-  btn.classList.add('sel')
-}
-function selectCatchTempo(t,btn){
-  S.catchTempo=t
-  const tc=TEMPOS[t]
-  document.querySelectorAll('.tp-btn').forEach(b=>{
-    b.style.borderColor='var(--border)'; b.style.background='transparent'; b.style.color='var(--muted)'
-  })
-  btn.style.borderColor=tc.color+'80'; btn.style.background=tc.color+'20'; btn.style.color=tc.color
-}
-async function startCatch(){
-  await engine.init(); await engine.resume()
-  S.catchTaps=[]; S.catchStart=Date.now()
-  S.catchPhase='playing'
-  const dc=DIFF[S.catchDiff], tc=TEMPOS[S.catchTempo]
-  document.getElementById('catch-setup').style.display='none'
-  document.getElementById('catch-result').style.display='none'
-  document.getElementById('catch-play').style.display='flex'
-  document.getElementById('catch-play-meta').textContent='L'+S.catchDiff+' · '+tc.bpm+' BPM'
-  document.getElementById('catch-acc').textContent='—'
-  document.getElementById('catch-fb').textContent='Listening...'
-  document.getElementById('catch-fb').className='fb-pill fb-neutral'
-  document.getElementById('catch-tally').textContent=''
-  initPips('catch-pips')
-  engine.setMetronome(false)
-  engine.start(tc.bpm, dc.countIn, (beatIdx,t,isCountIn)=>{
-    if(isCountIn) return
-    S.currentBeat=beatIdx
-    // Pips for catch screen
-    for(let i=0;i<8;i++){
-      const p=document.getElementById('cp'+i)
-      if(!p) continue
-      p.className='pip'+(i===0?' one':'')+(i===beatIdx?' cur '+(beatIdx===0?'one':'other'):'')
-    }
-    // Flash the tap button on the 1
-    const tbtn=document.getElementById('catch-tap-btn')
-    if(tbtn){
-      tbtn.classList.toggle('one-lit', beatIdx===0)
-    }
-  })
-}
-function handleCatchTap(e){
-  e.preventDefault()
-  if(!engine.isRunning) return
-  const tapT=engine.now()
-  const r=engine.scoreTap(tapT)
-  S.catchTaps.push({...r,ts:Date.now()})
-  const fb=buildFeedback(r)
-  setFeedback('catch-fb',fb.msg,fb.type)
-  if(navigator.vibrate) navigator.vibrate(r.rating==='perfect'?[10,20,10]:r.rating==='miss'?[60]:[8])
-  // Ripple
-  const btn=document.getElementById('catch-tap-btn')
-  const rip=document.createElement('div'); rip.className='ripple-el'; btn.appendChild(rip)
-  setTimeout(()=>rip.remove(),500)
-  // Update tally
-  const oneTaps=S.catchTaps.filter(t=>t.isOne)
-  const goodOneTaps=oneTaps.filter(t=>['perfect','good'].includes(t.rating))
-  if(oneTaps.length>0){
-    const acc=Math.round(goodOneTaps.length/oneTaps.length*100)
-    document.getElementById('catch-acc').textContent=acc+'%'
-    document.getElementById('catch-tally').textContent=goodOneTaps.length+' correct / '+oneTaps.length+' attempts on the "1"'
-  }
-}
-function finishCatch(){
-  engine.stop()
-  S.catchPhase='result'
-  document.getElementById('catch-play').style.display='none'
-  document.getElementById('catch-result').style.display='block'
-  // Compute result
-  const taps=S.catchTaps
-  const oneTaps=taps.filter(t=>t.isOne)
-  const goodOneTaps=oneTaps.filter(t=>['perfect','good'].includes(t.rating))
-  const acc=oneTaps.length>0?Math.round(goodOneTaps.length/oneTaps.length*100):0
-  const errs=taps.filter(t=>t.absErrMs!=null).map(t=>t.absErrMs)
-  const avgErr=errs.length?Math.round(errs.reduce((a,b)=>a+b,0)/errs.length):null
-  const color=acc>=70?'var(--ok)':acc>=45?'var(--warn)':'var(--err)'
-  document.getElementById('result-score').textContent=acc+'%'
-  document.getElementById('result-score').style.color=color
-  document.getElementById('result-sub').textContent=goodOneTaps.length+' of '+oneTaps.length+' attempts landed on the "1"'
-  document.getElementById('result-err').textContent=avgErr!==null?'Average timing error: '+avgErr+'ms':''
-  // Breakdown list
-  const bd=document.getElementById('tap-breakdown')
-  bd.innerHTML=''
-  taps.slice(-12).reverse().forEach(t=>{
-    const row=document.createElement('div'); row.className='tap-list-item'
-    const beatLabel=t.isOne?'Beat 1':'Beat '+(( t.nearestBeat??0)+1)
-    const errLabel=t.errMs!=null?(t.errMs>0?'+':'')+t.errMs+'ms':' — '
-    const tc=t.rating==='perfect'?'var(--ok)':t.rating==='good'?'var(--warn)':'var(--err)'
-    row.innerHTML=`<span style="color:${t.isOne?'var(--text)':'var(--faint)'}">${beatLabel}</span><span style="color:${tc}">${errLabel} ${t.rating}</span>`
-    bd.appendChild(row)
-  })
-  // Save
-  const sr=buildSessionRecord(S.catchTaps, S.catchTempo, 'catch-one', S.catchStart)
-  if(sr && sr.tapCount>=2) saveSession(sr)
-}
-function resetCatch(){
-  engine.stop()
-  S.catchPhase='setup'; S.catchTaps=[]
-  document.getElementById('catch-setup').style.display='flex'
-  document.getElementById('catch-play').style.display='none'
-  document.getElementById('catch-result').style.display='none'
+function setMode(m,btn){
+  S.mode=m;
+  document.querySelectorAll('.mtab').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  document.getElementById('tbl').textContent=MODES[m].label.toUpperCase();
+  document.getElementById('tbs').textContent=MODES[m].sub;
 }
 
-// ═══════════════════════════════════════════════════════════
-// LESSONS
-// ═══════════════════════════════════════════════════════════
-const LESSONS=[
-  {id:1,title:'The Steady Pulse',sub:'Feeling 4/4 time',dur:3,locked:false,intro:'The pulse is the heartbeat of all salsa. A steady, unchanging beat like a clock. Before finding the "1," you must feel the pulse so naturally you stop thinking about it.',sections:[
-    {type:'text',h:'What you are feeling',b:'Tap your foot. That steady thump is the pulse. In salsa, it runs at 70–140 beats per minute. Every melody and lyric sits on top of this invisible grid.'},
-    {type:'beat-grid',label:'All 8 beats are equal for now',highlighted:[1,2,3,4,5,6,7,8],special:[]},
-    {type:'text',h:'Your drill',b:'Go to Guided Practice → Slow → Beat mode. Tap every single beat for 2 minutes. Target: ±80ms accuracy on 80% of taps.'},
-  ]},
-  {id:2,title:'Counting 1–8',sub:'Salsa phrasing basics',dur:4,locked:false,intro:'Salsa phrases in groups of 8 beats. Dancers move on 1–2–3 (pause) 5–6–7 (pause). The 4 and 8 are the breath between movements.',sections:[
-    {type:'beat-grid',label:'Steps on shaded beats. Pauses on 4 and 8.',highlighted:[1,2,3,5,6,7],special:[1]},
-    {type:'text',h:'Two halves',b:'Counts 1–4 are the "A" phrase (primera). Counts 5–8 are the "B" phrase (segunda). Together they form one complete musical sentence of 8 beats.'},
-  ]},
-  {id:3,title:'Why the "1" Matters',sub:'The downbeat and phrase start',dur:5,locked:false,intro:'Count "1" is where everything resolves. The bass lands hardest here. The dancer\'s break step reconnects. Missing it is like starting a sentence mid-word.',sections:[
-    {type:'beat-grid',label:'The "1" is the anchor of every phrase',highlighted:[1,2,3,5,6,7],special:[1]},
-    {type:'text',h:'Count 1 vs Count 5',b:'Both start movement. But "1" has a sense of arrival — the phrase ends and begins again. "5" is continuation. Listen for the bass hitting heavier on count 1.'},
-    {type:'text',h:'Your drill',b:'Try Catch the 1 → Level 1. You get a count-in and slow tempo. Tap when you feel the biggest beat landing. See your error in milliseconds.'},
-  ]},
-  {id:4,title:'Hearing the Clave',sub:'The rhythmic backbone',dur:5,locked:true,intro:'The clave is a 2-bar rhythmic pattern — the skeleton everything hangs on. You don\'t tap to it, but you feel where you are within it.',sections:[
-    {type:'text',h:'3-2 Clave (most common)',b:'Bar 1: beats 1, 2&, 4. Bar 2: beats 2, 3. Once you feel the clave without counting it, you will never lose the "1" again.'},
-    {type:'clave',label:'3-2 Clave across 2 bars',b1:[1,0,1,0,0,0,1,0],b2:[0,0,1,0,1,0,0,0]},
-  ]},
-  {id:5,title:'Phrase Starts & Breaks',sub:'Catching musical transitions',dur:6,locked:true,intro:'Salsa musicians signal phrase starts with fills, horn stabs, and bass variations. Learning to hear these is how you keep orientation even when distracted.',sections:[
-    {type:'text',h:'Musical signposts',b:'A bass fill, a horn hit, or a vocal phrase landing on count 1 — these are your anchors. When the music resets, that is the "1." Start counting from there.'},
-  ]},
-  {id:6,title:'Recovery After Breaks',sub:'Finding the beat again',dur:7,locked:true,intro:'Every dancer loses the beat. The skill is recovering it in 4 beats or fewer — silently, invisibly.',sections:[
-    {type:'text',h:'The 4-beat recovery rule',b:'When lost: (1) stop tapping. (2) find the bass. (3) count up to 4. (4) the next count after 4 that feels heavy is probably the "1." Re-enter.'},
-  ]},
-]
-
-function renderLearnList(){
-  document.getElementById('learn-list-view').style.display='block'
-  document.getElementById('learn-lesson-view').style.display='none'
-  const list=document.getElementById('lesson-list'); list.innerHTML=''
-  LESSONS.forEach(l=>{
-    const done=S.completedLessons.has(l.id)
-    const locked=l.locked && !S.completedLessons.has(l.id-1)
-    const btn=document.createElement('button')
-    btn.className='lesson-row'+(locked?' locked':'')
-    if(locked) btn.disabled=true
-    btn.innerHTML=`
-      <div class="lesson-num ${done?'ln-done':locked?'ln-locked':'ln-active'}">${done?'✓':locked?'🔒':l.id}</div>
-      <div><div class="lesson-name">${l.title}</div><div class="lesson-meta">${l.sub} · ${l.dur} min</div></div>
-      <span class="lesson-arrow">›</span>`
-    if(!locked) btn.onclick=()=>openLesson(l)
-    list.appendChild(btn)
-  })
-}
-function openLesson(l){
-  S.activeLesson=l; S.lessonStep=0
-  document.getElementById('learn-list-view').style.display='none'
-  const lv=document.getElementById('learn-lesson-view')
-  lv.style.display='flex'; renderLessonStep()
-}
-function renderLessonStep(){
-  const l=S.activeLesson, step=S.lessonStep
-  const total=l.sections.length
-  const section=l.sections[step]
-  const lv=document.getElementById('learn-lesson-view')
-  const prog=Math.round(((step+1)/total)*100)
-  let secHTML=''
-  if(step===0){
-    secHTML+=`<div class="lv-intro"><div class="lv-intro-title">${l.title}</div><div class="lv-intro-text">${l.intro}</div></div>`
-  }
-  if(section.type==='text'){
-    secHTML+=`<div class="info-block"><div class="info-head">${section.h}</div><div class="info-text">${section.b}</div></div>`
-  }
-  if(section.type==='beat-grid'){
-    const cells=[1,2,3,4,5,6,7,8].map(n=>{
-      const sp=section.special?.includes(n)
-      const on=section.highlighted?.includes(n)
-      return `<div class="bc ${sp?'special':on?'on':'off'}">${n}</div>`
-    }).join('')
-    secHTML+=`<div class="info-block"><div class="beat-grid">${cells}</div><div class="grid-label">${section.label}</div></div>`
-  }
-  if(section.type==='clave'){
-    const b1=section.b1.map((v,i)=>`<div class="bc ${v?'special':'off'}">${v?'●':'·'}</div>`).join('')
-    const b2=section.b2.map((v,i)=>`<div class="bc ${v?'on':'off'}">${v?'●':'·'}</div>`).join('')
-    secHTML+=`<div class="info-block"><div style="font-size:12px;color:var(--muted);margin-bottom:8px">Bar 1</div><div class="beat-grid">${b1}</div><div style="font-size:12px;color:var(--muted);margin:12px 0 8px">Bar 2</div><div class="beat-grid">${b2}</div><div class="grid-label">${section.label}</div></div>`
-  }
-  lv.innerHTML=`
-    <div class="lv-hdr">
-      <button class="back-btn" onclick="backLesson()">‹</button>
-      <div class="lv-title">${l.title}</div>
-      <div class="lv-step">${step+1} / ${total}</div>
-    </div>
-    <div class="lv-prog"><div class="lv-prog-fill" style="width:${prog}%"></div></div>
-    <div class="lv-body">${secHTML}</div>
-    <div class="lv-nav">
-      ${step>0?`<button class="big-btn secondary" style="flex:1;margin-top:0;padding:14px" onclick="lessonBack()">← Back</button>`:''}
-      <button class="big-btn" style="flex:2;margin-top:0;padding:14px" onclick="lessonNext()">
-        ${step<total-1?'Next →':'Complete ✓'}
-      </button>
-    </div>`
-}
-function backLesson(){
-  S.activeLesson=null
-  document.getElementById('learn-lesson-view').style.display='none'
-  document.getElementById('learn-list-view').style.display='block'
-  renderLearnList()
-}
-function lessonBack(){ S.lessonStep--; renderLessonStep() }
-function lessonNext(){
-  const l=S.activeLesson, total=l.sections.length
-  if(S.lessonStep<total-1){ S.lessonStep++; renderLessonStep() }
-  else {
-    S.completedLessons.add(l.id); saveLessons()
-    backLesson()
-  }
+function cycleDiff(){
+  if(S.playing)return;
+  S.diff=S.diff<4?S.diff+1:1;
+  document.getElementById('diff-ic').textContent='L'+S.diff;
 }
 
-// ═══════════════════════════════════════════════════════════
-// PROGRESS
-// ═══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+// SESSION SUMMARY
+// ══════════════════════════════════════════════════════════
+function showSummary(rec){
+  if(!rec){return;}
+  const acc=rec.accuracy, t=rec.tapCount;
+  const perfect=S.taps.filter(x=>x.rating==='perfect').length;
+  const col=acc>=75?'var(--ok)':acc>=50?'var(--wa)':'var(--er)';
+  const grade=acc>=90?'Locked In 🔥':acc>=75?'Solid ✓':acc>=60?'Getting There':acc>=40?'Keep Practicing':'Need Work';
+  document.getElementById('ss-score').textContent=acc+'%';
+  document.getElementById('ss-score').style.color=col;
+  document.getElementById('ss-grade').textContent=grade;
+  document.getElementById('ss-grade').style.color=col;
+  document.getElementById('ss-taps').textContent=t;
+  document.getElementById('ss-err').textContent=rec.avgErr?rec.avgErr+'ms':'—';
+  document.getElementById('ss-perf').textContent=perfect;
+  const late=S.taps.filter(x=>x.direction==='late').length;
+  const early=S.taps.filter(x=>x.direction==='early').length;
+  let insight='';
+  if(late>t*.6)insight='You are <strong>consistently behind the beat</strong>. The YouTube audio takes a moment to process in your brain — try tapping 50ms earlier than you feel the beat.';
+  else if(early>t*.6)insight='You are <strong>rushing</strong>. Let the bass note land fully before you tap. It comes to you — you don\'t chase it.';
+  else if(acc>=75&&S.diff<4)insight='<strong>Strong session.</strong> Try Level '+(S.diff+1)+' next — fewer visual aids will force your ear to do more work.';
+  else if(acc<40&&S.track)insight='Focus on the <strong>bass guitar</strong> in '+S.track.name+'. It anchors every "1" with its lowest, heaviest note. Track it, don\'t count it.';
+  else insight='<strong>You are finding the groove.</strong> Now isolate just the bass — mute everything in your mind except that deep thump on beat 1.';
+  document.getElementById('ss-ins').innerHTML=insight;
+  const list=document.getElementById('tb-list');list.innerHTML='';
+  S.taps.slice(-10).reverse().forEach(x=>{
+    const row=document.createElement('div');row.className='tb-row';
+    const c=x.rating==='perfect'?'var(--ok)':x.rating==='good'?'var(--wa)':'var(--er)';
+    row.innerHTML=`<span style="color:var(--mu)">Beat ${(x.nearestBeat??0)+1}</span><span style="color:${c}">${x.errMs!==null?(x.errMs>0?'+':'')+x.errMs+'ms ':''}<em>${x.rating}</em></span>`;
+    list.appendChild(row);
+  });
+  document.getElementById('summary').classList.add('on');
+}
+function closeSummary(){document.getElementById('summary').classList.remove('on');}
+
+// ══════════════════════════════════════════════════════════
+// STATS
+// ══════════════════════════════════════════════════════════
+function avg(arr){return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;}
+
+function buildRec(taps,tempo,bpm,diff,mode,start){
+  if(!taps||!taps.length)return null;
+  const n=taps.length, good=taps.filter(t=>['perfect','good'].includes(t.rating)).length;
+  const acc=Math.round(good/n*100);
+  const errs=taps.filter(t=>t.absErrMs!=null).map(t=>t.absErrMs);
+  const avgErr=errs.length?Math.round(errs.reduce((a,b)=>a+b,0)/errs.length):null;
+  const dirs=taps.map(t=>t.direction).filter(Boolean);
+  const late=dirs.filter(d=>d==='late').length, early=dirs.filter(d=>d==='early').length;
+  const dir=late>dirs.length*.55?'late':early>dirs.length*.55?'early':'center';
+  return{tempo:tempo||'slow',bpm:bpm||82,diff,mode,accuracy:acc,avgErr,direction:dir,tapCount:n,startedAt:start||Date.now()};
+}
+
 function computeStats(){
-  const sessions=S.sessions
-  const empty={accuracy:0,sessions:0,trend:'none'}
-  const byTempo={slow:{...empty},medium:{...empty},fast:{...empty}}
-  if(!sessions.length) return {byTempo,streak:0,total:0,overallAcc:0,avgErr:0,insights:[],recent:[]}
-  for(const t of ['slow','medium','fast']){
-    const arr=sessions.filter(s=>s.tempo===t)
-    if(!arr.length) continue
-    const acc=Math.round(arr.reduce((s,x)=>s+(x.accuracy??0),0)/arr.length)
-    const recent=arr.slice(-3).map(s=>s.accuracy??0)
-    const prev=arr.slice(-6,-3).map(s=>s.accuracy??0)
-    const rav=avg(recent), pav=avg(prev)
-    const trend=prev.length===0?'none':rav-pav>5?'improving':rav-pav<-5?'declining':'stable'
-    byTempo[t]={accuracy:acc,sessions:arr.length,trend}
-  }
-  const streak=computeStreak(sessions)
-  const overallAcc=Math.round(avg(sessions.map(s=>s.accuracy??0)))
-  const errs=sessions.filter(s=>s.avgErr!=null).map(s=>s.avgErr)
-  const avgErr=errs.length?Math.round(avg(errs)):0
-  const insights=generateInsights(byTempo,sessions)
-  const recent=[...sessions].sort((a,b)=>b.startedAt-a.startedAt).slice(0,10)
-  return{byTempo,streak,total:sessions.length,overallAcc,avgErr,insights,recent}
-}
-function avg(arr){ return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0 }
-function computeStreak(sessions){
-  const today=new Date(); today.setHours(0,0,0,0)
-  const days=new Set(sessions.map(s=>{const d=new Date(s.startedAt);d.setHours(0,0,0,0);return d.getTime()}))
-  let streak=0, check=today.getTime()
-  while(days.has(check)){ streak++; check-=86400000 }
-  if(streak===0&&days.has(today.getTime()-86400000)){
-    check=today.getTime()-86400000
-    while(days.has(check)){ streak++; check-=86400000 }
-  }
-  return streak
-}
-function generateInsights(bt,sessions){
-  const insights=[]
-  if(bt.slow.accuracy>=70&&bt.medium.accuracy<50&&bt.medium.sessions>0)
-    insights.push('You\'re accurate at slow tempo but drift at medium. Focus on relaxing your anticipation — the beat is coming to you.')
-  const catchSess=sessions.filter(s=>s.type==='catch-one')
-  const guidedSess=sessions.filter(s=>s.type==='guided')
-  const ca=avg(catchSess.map(s=>s.accuracy??0)), ga=avg(guidedSess.map(s=>s.accuracy??0))
-  if(ga-ca>20&&catchSess.length>2) insights.push('You hear the pulse well but miss phrase starts. Do more Catch the 1 drills — listen for the bass landing between beats 7 and 1.')
-  if(bt.slow.trend==='improving') insights.push('Your slow tempo accuracy is trending up. You\'re ready for more medium-tempo work.')
-  if(ca<50&&ga>65&&catchSess.length>3) insights.push('You find the beat but confuse count 5 with count 1. Listen for the bass hitting heavier on 1. The "5" feels like continuation; the "1" feels like arrival.')
-  if(!insights.length) insights.push('Keep training consistently. Timing accuracy builds slowly — even 2% per week is excellent progress.')
-  return insights
+  const sess=S.sessions;
+  const bt={slow:{acc:0,n:0},medium:{acc:0,n:0},fast:{acc:0,n:0}};
+  sess.forEach(s=>{if(bt[s.tempo]){bt[s.tempo].acc+=s.accuracy||0;bt[s.tempo].n++;}});
+  Object.keys(bt).forEach(k=>{if(bt[k].n)bt[k].acc=Math.round(bt[k].acc/bt[k].n);});
+  const today=new Date();today.setHours(0,0,0,0);
+  const days=new Set(sess.map(s=>{const d=new Date(s.startedAt);d.setHours(0,0,0,0);return d.getTime()}));
+  let streak=0,c=today.getTime();while(days.has(c)){streak++;c-=86400000;}
+  const oa=sess.length?Math.round(avg(sess.map(s=>s.accuracy||0))):0;
+  const ae=Math.round(avg(sess.filter(s=>s.avgErr!=null).map(s=>s.avgErr)));
+  const recent=[...sess].sort((a,b)=>b.startedAt-a.startedAt).slice(0,12);
+  const insights=genInsights(bt,sess);
+  return{bt,streak,total:sess.length,oa,ae,recent,insights};
 }
 
-function buildSessionRecord(taps, tempo, type, start){
-  if(!taps||taps.length===0) return null
-  const scored=type==='catch-one'?taps.filter(t=>t.isOne!==false):taps
-  if(!scored.length) return null
-  const accuracy=Math.round(scored.reduce((s,t)=>s+(t.score??0),0)/scored.length)
-  const errs=scored.filter(t=>t.absErrMs!=null).map(t=>t.absErrMs)
-  const avgErr=errs.length?Math.round(avg(errs)):null
-  const dirs=scored.map(t=>t.direction).filter(Boolean)
-  const dir=dirs.length?Object.entries(dirs.reduce((a,v)=>{a[v]=(a[v]??0)+1;return a},{})).sort((a,b)=>b[1]-a[1])[0][0]:null
-  return{tempo,type,accuracy,avgErr,direction:dir,tapCount:taps.length,startedAt:start??Date.now()}
+function genInsights(bt,sess){
+  const ins=[];
+  if(bt.slow.acc>=60&&bt.medium.acc<40&&bt.medium.n>0)ins.push('You\'re solid at slow but losing it at medium. The music is moving faster than your internal clock — practice counting out loud before tapping.');
+  if(bt.slow.acc>=60&&!S.unlocked.medium)ins.push('You\'ve hit 60% on slow tempo — Medium tracks are now unlocked! El Cantante and Vivir Mi Vida are great next steps.');
+  if(bt.medium.acc>=60&&!S.unlocked.fast)ins.push('Medium unlocked at 60%+ — Fast tracks are now available. La Murga and Quimbara are serious challenges. You\'re ready.');
+  const lateSess=sess.filter(s=>s.direction==='late');
+  if(lateSess.length>sess.length*.6&&sess.length>3)ins.push('You\'re consistently behind the beat. Try predicting beat 1 a split second before you hear it — the bass announcement happens fractionally before the full beat lands.');
+  if(!ins.length&&sess.length>0)ins.push('Keep training with real music. The goal: your tap lands before you consciously think about it. That\'s when you\'ve internalized the rhythm.');
+  if(!ins.length)ins.push('Pick a track and start your first session. Begin with Pedro Navaja — it has the clearest beat structure for beginners.');
+  return ins;
 }
 
 function renderProgress(){
-  const stats=computeStats()
-  document.getElementById('prog-sub').textContent=(stats.streak>0?stats.streak+'-day streak · ':'')+stats.total+' sessions total'
-  const body=document.getElementById('progress-body')
-  if(stats.total===0){
-    body.innerHTML=`<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">No sessions yet</div><div class="empty-text">Complete your first practice session to see progress here.</div></div>`
-    return
-  }
-  const sumHTML=`<div class="summary-grid">
-    <div class="sum-card"><div class="sum-val">${stats.overallAcc}%</div><div class="sum-lbl">Overall</div></div>
-    <div class="sum-card"><div class="sum-val">${stats.total}</div><div class="sum-lbl">Sessions</div></div>
-    <div class="sum-card"><div class="sum-val">${stats.avgErr>0?stats.avgErr+'ms':'—'}</div><div class="sum-lbl">Avg error</div></div>
-  </div>`
-  const ringColors={slow:'#4CAF7D',medium:'#E8A827',fast:'#E05252'}
-  const ringsHTML=`<div class="slabel">By tempo</div><div class="rings-row">
-    ${['slow','medium','fast'].map(id=>{
-      const t=stats.byTempo[id], c=ringColors[id]
-      const circ=144, off=circ-(t.accuracy/100)*circ
-      const trendEl=t.trend==='improving'?`<div class="trend trend-up">↑ improving</div>`:t.trend==='declining'?`<div class="trend trend-dn">↓ declining</div>`:t.sessions>0?`<div class="trend trend-st">→ stable</div>`:''
-      return `<div class="ring-card">
-        <div class="ring-wrap" style="margin-bottom:6px">
-          <svg width="56" height="56" viewBox="0 0 56 56" style="transform:rotate(-90deg)"><circle cx="28" cy="28" r="23" fill="none" stroke="var(--surf2)" stroke-width="5"/><circle cx="28" cy="28" r="23" fill="none" stroke="${c}" stroke-width="5" stroke-linecap="round" stroke-dasharray="144" stroke-dashoffset="${off}"/></svg>
-          <div class="ring-lbl">${t.accuracy}%</div>
-        </div>
-        <div class="ring-name">${id.charAt(0).toUpperCase()+id.slice(1)}</div>
-        ${trendEl}
-        <div class="sessions-ct">${t.sessions} sessions</div>
-      </div>`
-    }).join('')}
-  </div>`
-  const insHTML=`<div class="slabel">Coach insight</div>`+stats.insights.slice(0,2).map(i=>`<div class="insight-card"><div class="insight-text">${i}</div></div>`).join('')
-  const tempoNames={slow:'Slow',medium:'Medium',fast:'Fast'}
-  const histHTML=`<div class="slabel">Recent sessions</div><div class="hist-list">
-    ${stats.recent.map(s=>{
-      const acc=s.accuracy??0
-      const color=acc>=70?'var(--ok)':acc>=45?'var(--warn)':'var(--err)'
-      const d=new Date(s.startedAt).toLocaleDateString('en-US',{month:'short',day:'numeric'})
-      const type=s.type==='catch-one'?'Catch the 1':'Guided Practice'
-      return `<div class="hist-row">
-        <div class="hist-dot" style="background:${color}"></div>
-        <div style="flex:1"><div class="hist-mode">${type} · ${tempoNames[s.tempo]??s.tempo}</div><div class="hist-meta">${d} · ${s.tapCount??0} taps${s.avgErr?' · '+s.avgErr+'ms avg':''}</div></div>
-        <div class="hist-acc" style="color:${color}">${acc}%</div>
-      </div>`
-    }).join('')}
-  </div>`
-  body.innerHTML=sumHTML+ringsHTML+insHTML+histHTML
+  updateUnlocks();
+  const st=computeStats();
+  document.getElementById('prog-sub').textContent=(st.streak>0?st.streak+'-day streak · ':'')+st.total+' sessions total';
+  const uc=document.getElementById('unlock-card');
+  if(!S.unlocked.medium){
+    uc.style.display='block';
+    const slowAcc=st.bt.slow.acc;
+    document.getElementById('pu-title').textContent='Unlock Medium Tempo Tracks';
+    document.getElementById('pu-fill').style.width=Math.min(100,slowAcc/60*100)+'%';
+    document.getElementById('pu-lbl').textContent=slowAcc+'/60%';
+    document.getElementById('pu-hint').textContent='Reach 60% accuracy on Slow tracks to unlock Medium';
+  } else if(!S.unlocked.fast){
+    uc.style.display='block';
+    const medAcc=st.bt.medium.acc;
+    document.getElementById('pu-title').textContent='Unlock Fast Tempo Tracks';
+    document.getElementById('pu-fill').style.width=Math.min(100,medAcc/60*100)+'%';
+    document.getElementById('pu-lbl').textContent=medAcc+'/60%';
+    document.getElementById('pu-hint').textContent='Reach 60% accuracy on Medium tracks to unlock Fast';
+  } else { uc.style.display='none'; }
+  document.getElementById('pg-oa').textContent=st.oa+'%';
+  document.getElementById('pg-tot').textContent=st.total;
+  document.getElementById('pg-str').textContent=st.streak;
+  ['slow','medium','fast'].forEach(id=>{
+    const t=st.bt[id],circ=132,off=circ-(t.acc/100)*circ;
+    setTimeout(()=>{const r=document.getElementById('rg-'+id);if(r)r.setAttribute('stroke-dashoffset',off);},100);
+    const rl=document.getElementById('rl-'+id);if(rl)rl.textContent=t.acc+'%';
+    const rc=document.getElementById('rc-'+id);if(rc)rc.textContent=t.n+(t.n===1?' session':' sessions');
+  });
+  document.getElementById('ins-cards').innerHTML=st.insights.slice(0,3).map(i=>`<div class="ins">${i}</div>`).join('');
+  const tc={slow:'#4CAF7D',medium:'#E8A827',fast:'#E05252'};
+  const mn={slow:'Slow',medium:'Medium',fast:'Fast'};
+  const modeN=['Every Beat','1+5','Find the 1','Free Test'];
+  document.getElementById('hist-list').innerHTML=st.recent.length
+    ? st.recent.map(s=>{
+        const acc=s.accuracy||0,col=acc>=70?'var(--ok)':acc>=45?'var(--wa)':'var(--er)';
+        const d=new Date(s.startedAt).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+        const trackName=TRACKS.find(t=>t.tempo===s.tempo)?.name||mn[s.tempo]||s.tempo;
+        return`<div class="hr"><div class="hd" style="background:${col}"></div><div style="flex:1"><div class="hm">${trackName} · ${modeN[s.mode]??'Practice'}</div><div class="hmt">${d} · ${s.tapCount||0} taps${s.avgErr?' · '+s.avgErr+'ms':''}</div></div><div class="ha" style="color:${col}">${acc}%</div></div>`;
+      }).join('')
+    : '<div class="empty-state">No sessions yet — pick a track and start training</div>';
 }
 
-// ═══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+// AUDIO UNLOCK
+// ══════════════════════════════════════════════════════════
+async function unlock(){try{await engine.init();await engine.resume();}catch(e){}}
+['touchstart','touchend','pointerdown','click'].forEach(ev=>document.addEventListener(ev,unlock,{passive:true}));
+document.addEventListener('pointerdown',()=>{
+  const b=document.getElementById('ub');if(b){b.style.opacity='0';setTimeout(()=>b.remove(),300);}
+},{once:true});
+
+// ══════════════════════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════════════════════
-initPips('pips')
-initPips('catch-pips')
-renderHome()
-renderLearnList()
-// Aggressive audio unlock for iOS/Safari/Chrome
-// Must call resume() on EVERY user gesture until context is running
-async function unlockAudio() {
-  try {
-    await engine.init();
-    if (engine.ctx && engine.ctx.state === 'suspended') {
-      await engine.ctx.resume();
-    }
-  } catch(e) {}
-}
-['touchstart','touchend','pointerdown','click','keydown'].forEach(ev => {
-  document.addEventListener(ev, unlockAudio, {passive: true});
-});
-
-// Show audio unlock banner until first interaction
-const banner = document.createElement('div');
-banner.id = 'audio-banner';
-banner.innerHTML = '🔊 Tap anywhere to enable audio';
-banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999;background:var(--red);color:white;text-align:center;padding:10px;font-size:14px;font-weight:600;font-family:var(--fd);letter-spacing:.03em;cursor:pointer';
-document.body.appendChild(banner);
-document.addEventListener('pointerdown', () => {
-  const b = document.getElementById('audio-banner');
-  if (b) { b.style.opacity='0'; b.style.transition='opacity .3s'; setTimeout(()=>b.remove(), 300); }
-}, {once: true});
+// ══════════════════════════════════════════════════════════
+buildTimeline();
+updateUnlocks();
+renderTracks('all');
 </script>
 </body>
 </html>
